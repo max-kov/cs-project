@@ -1,38 +1,54 @@
 ---
 title: Computer Science project.
 author: Maksims Kovalovs
-output:
-    html_document:
-        toc: true
-        toc_depth: 2
-        number_sections: true
-        fig_caption: true
+output: html_document
 ---
 
 # Analysis
 
-## Description of Current System:
+## Description of Current System
 Most pool game are hosted on flash game websites like miniclip.com, and others, unfortunately these websites do not provide you with game files, and you have to play the game in your browser. This is bad not only because that does not allow for any customisation for the game files if the user wants to do so, but also players dont know how the physics of the game works, for example the players dont know the friction coefficients between the balls and the table which means that the game experience could deviate from the one the players used to in real life.
 
-## Identification of End Users:
+## Identification of End Users
 The primary use for this project is for pool game enthusiasts who want the ability to customise their experience to their needs. The casual pool game players will enjoy the game as well, but these people already have a lot of options available to them online.
 
-## User Needs:
+## User Needs
 Make the constumisable options of the game like the friction coefficients easily accesible in the config file, so that even people without coding experience could adjust the values.
 The game should be open source so that people who are interested in the inner workings of the game could analyse it.
 
-## Acceptable Limitations:
+## Acceptable Limitations
 The purpose of the game is to provide a highly customisable experience, and thus the actual graphics of the game might be less appealing than other games online.
 
-## Data Sources and Destinations:
+## Object diagram
 
-## Object Analysis Diagram:
+The project has a lot of different classes, and I have made object diagrams from every file in the project.
 
-## Data Flow Diagram:
+![cue.py](object_diagram_cue.png)
 
-## Proposed Solution:
+![event.py](object_diagram_event.png)
 
-## Evidence of Analysis:
+![graphics.py](object_diagram_graphics.png)
+
+![ball.py](object_diagram_ball.png)
+
+![table_sprites.py](object_diagram_tablesprites.png)
+
+## Proposed Solution
+
+Create an open source game with a configuration file to suit user needs. The program will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
+The game would be written in python and some additional libraries:
+
+* Pygame
+* Numpy
+* Zope.Event
+
+### Pygame
+Python has a library called turtle that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the pygame website
+Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, pygame is highly portable and runs on nearly every platform and operating system.
+
+### Numpy
+Numpy is a powerful tool for numerical calculations often involving matrices. In this project matrices are used for drawing the ball sprites, specifically 3d rotation matrices.
+## Evidence of Analysis
 Physics behind the simulation
 The game will have to resolve elastic ball collisions and other physical processes. The balls will be modeled To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online. (<https://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php> and <https://en.wikipedia.org/wiki/Elastic_collision> )
 
@@ -42,61 +58,138 @@ There is a plethora of games which are closed source, but it’s hard to find th
 The games cannot be edited/configured. By limiting the ability of changing the inner- workings of the game the user might not get the experience he wants, for example the user might want to practise a specific kind of shot, do trick shots or change the size and the colour of the balls. By making an open-source game the user can change everything!
 
 ## Objectives
+* Create a main menu at start of the game
+* Allow the game to be played by two players
+* The user can change the following game constants through the config file:
+    * The size of the balls by changing the ball size integer in the Config file
+    * The colour of the balls
+
 
 ## Critical Path
-Research the physics behind the collisions and decide which python modules would be useful for the game
+To make the development easier, im going to split the program in 4 stages:
+* In the first stage I will implement the general shapes and objects - the table the balls. The balls will have position and velocity vectors but collisions at this stage of the game will be ignored
+* In the second stage I will ball collisions with the table and with other balls.
+* In the third stage I will add the cue stick and the table pockets. The physics of the game should be finished after this stage.
+* In the fourth and final stage I will add the "game" parts of the game, namely, pool rules (stuff like player turns and whether you are allowed to move the white ball on your turn) and a main menu.
 
 # Documented design
 
-## Overall System Design:
+## Overall System Design
 
-## Modular Design:
+## Modular Design
 
-## Data Validation:
+* Main menu
+  * The game
+    * Stop the game
+    * Game over
+  * Quit the game
 
-## Algorithms:
+## Algorithms
 
 ### Collision detection
 
 One way detect a ball to ball collision is to check every frame the distances between every ball and, if the distance between two balls is less that the sum of their radii, that means that they have collided.
 
-![](ball_collision1.png)
+![naive collision](ball_collision1.png)
 
 Unfortunately, such a strategy sometimes makes the balls "stick" to each other. That is because this strategy doesn't take into consideration the direction the balls are going. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
 
 ![collision with velocities](ball_collision2.png)
 
-We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product 
+We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the displacement difference between 2 balls^[take away the dispalacement vector of the first ball from the second one] and the velocity difference vector (labeled as v1-v2 on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
-* Collision resolve
+![collision with dot product](ball_collision3.png)
 
-* Cue stick click detection
+### Collision resolve
 
-* Generating the table
+There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are actually closely related. Both types are resolved using newtonian physics.
 
+* Ball to line:
+  When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed (multiplied by -1). The component parralel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
-## User Interface:
+* Ball to ball:
+  Using the law of the conservation of momemtum we do
+  `m1*u1 + m2*u2 = m1*v1 + m2*v2`
+  Normaly to calculate the ball collision vectors you would have to consider kinetic energies and momentum to resolve properly, but if the masses of the balls are the same you could do a shortcut.
+  ```
+  m*u1 + m*u2 = m*v1 + m*v2
+  u1 + u2 = v1 + v2
+  v1 - u1 = -(v2 - u2)
+  Δv1 = -Δv2
+  ```
+  From this we see that any change in speed in the first ball has to be provided by the second ball, in other words the change in the velocity of the first ball will equal to change of the velocity of the second ball. When a ball collides with a ball the force on the balls goes through the collision point between the balls. Furthermore, since we are modeling elastic collisions we know that initial and final velocity will be equal, therefore the component of the balls velocity that goes through the collision point is flipped.
 
-## Design Explained Through Detailed Run Through of the Program with an Example
+### Cue stick click detection
+Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the sarea of triangles using herons formula.
 
-## Database:
+![click inside cue](cue1.png)
 
-## Proposal
-The game will touch on several computer science areas. The program will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
-The game would be written in python and some additional libraries:
+The area of the green triangles equals the area of the cue, therefore the click is inside the cue.
 
-* Pygame
-* Numpy
-* Zope.Event
+![click outside cue](cue2.png)
 
-### Pygame
-Python has a library called turtle[2] that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the pygame website[1]
-Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, pygame is highly portable and runs on nearly every platform and operating system.
+### The main game loop
 
-### Numpy
-Numpy is a powerful tool for numerical calculations often involving matrices. In this project matrices are used for drawing the ball sprites, specifically 3d rotation matrices.
+Pseudocode:
+```
+While not_closed:
+    button_pressed_in_main_menu = main_menu_get_button()
+
+    if button_pressed_in_main_menu == "Play_button":
+        While not_closed or game_is_over():
+            resolve_collisions()
+            do_one_frame()
+
+            If all_balls_not_moving():
+                check_pool_rules()
+                use_cue()
+
+    if button_pressed_in_main_menu == "Exit_button":
+        not_closed=False
+```
+
+This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do *one frame*, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
+
+## User Interface
+The game has a very minimal user interface. The game has a small main menu.
+
+![main menu](main_menu.png)
+
+The menu only has two buttons - *Play Pool*, upon clicking which the game starts, and *Exit* which exits the game. The buttons change color when the player mouses over the button.
+
+![main menu mouseover](main_menu_button.png)
+
+Even though the menu is very minimal, it is very customizable. Many things can be customized in the menu section in the config file (config.py).
+
+```
+...
+# menu
+menu_text_color = (255, 255, 255)
+menu_text_selected_color = (0, 0, 255)
+menu_title_text = "Pool"
+menu_buttons = ["Play Pool", "Exit"]
+menu_margin = 20
+menu_spacing = 10
+menu_title_font_size = 40
+menu_option_font_size = 20
+exit_button = 2
+play_game_button = 1
+...
+```
+For example, to add a new button, you need to add a new string to `menu_buttons` array. And change the exit_button and the play_game_button variables. The variable exit_button has the index of the "exit button" which, when is clicked, closes the game.
+```
+# menu
+...
+menu_buttons = ["Play Pool", "Test", "Exit"]
+...
+exit_button = 3
+play_game_button = 1
+...
+```
+![main menu test](main_menu_test.png)
 
 ## Design  considerations
+
 Judging from other computer games, the pool game should include these things:
 
 * The game screen should be big enough to see everything clearly.
@@ -138,14 +231,81 @@ In the game there is a special case  where there is a need for extra validation.
 
 ![bad ball placement](table.png)
 
-## Methods
+# Technical solution
 
-## Technical solution
+## Debugging errors during the development of the program
 
-## Testing
+### "Reverse" shot bug
 
-## Introduction
-In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface.
+This^[https://github.com/max-kov/pool/commit/872bdde305882ee68b771a3a03be3ab264d586ca] is a bug regarding the cue. If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
+
+
+All of the code is available on github.com/max-kov/pool with testing results.
+
+## collisions.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/collisions.py
+```
+
+## ball.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/ball.py
+```
+
+## config.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/config.py
+```
+
+## cue.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/cue.py
+```
+
+## event.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/event.py
+```
+
+## gamestate.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/gamestate.py
+```
+
+## graphics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/graphics.py
+```
+
+## main.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/main.py
+```
+
+## physics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/physics.py
+```
+
+## table_sprites.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/table_sprites.py
+```
+
+# Testing
+
+## White box testing (Unit testing)
+In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, and, more specificaly, unit testing, because I am testing specific functions of the program (which I wrote myself).
 To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to github. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
 
 ```
@@ -157,11 +317,13 @@ Here is another, more complicated example of an edge case test:
 
 ```
 def test_movement4(self):
-ball1.set_velocity((1, 1))
-ball2.move_to(-fortyfive_degree_position)
-ball2.set_velocity((1, 1))
-assert not physics.ball_collision_check(ball1, ball2)
+    ball1.set_velocity((1, 1))
+    ball2.move_to(-fortyfive_degree_position)
+    ball2.set_velocity((1, 1))
+    assert not physics.ball_collision_check(ball1, ball2)
 ```
+
+![test1](test1.png)
 
 The test sets the balls such that they are touching, however, both balls are moving with the same velocity. That means there is no collision.
 
@@ -169,24 +331,78 @@ This is an example of an extreme test:
 
 ```
 def test_movement10(self):
-ball1.set_velocity((0, 1))
-ball2.move_to((0, ball_radius * 2))
-ball2.set_velocity((200000000, -200000000000))
-assert physics.ball_collision_check(ball1, ball2)
+    ball1.set_velocity((0, 1))
+    ball2.move_to((0, ball_radius * 2))
+    ball2.set_velocity((200000000, -200000000000))
+    assert physics.ball_collision_check(ball1, ball2)
 ```
 
 The values in the test are exaggerated so that we know that the game can handle extreme values.
-To run the tests
-The file contains many tests, including matrix transformation tests, line to ball collision tests and the triangle area test
-Unfortunately, it is very hard to make unit tests with GUI like main menus or game screens. To test that, you have to manually look if the game looks as intended. To test that i had to play several rounds of the game after adding the changes.
 
+![test2](test2.png)
+
+### To run the tests
+
+The file contains many tests, including matrix transformation tests, line to ball collision tests and the triangle area test. Here is the file itself:
+
+```{r engine='bash', comment='', echo=F}
+cat tests/test_physics.py
+```
+
+Here is me running the tests on my machine on the lates pool build.
+
+```
+PYTHONPATH=./pool py.test --cov=.
+========================= test session starts ==========================
+platform linux -- Python 3.6.4, pytest-3.2.3, py-1.5.2, pluggy-0.4.0
+rootdir: /home/max/code/python/pool, inifile:
+plugins: cov-2.5.1, asyncio-0.8.0
+collected 31 items
+
+tests/test_physics.py ...............................
+
+----------- coverage: platform linux, python 3.6.4-final-0 -----------
+Name                    Stmts   Miss  Cover
+-------------------------------------------
+pool/__init__.py            0      0   100%
+pool/ball.py              120     84    30%
+pool/collisions.py         26     18    31%
+pool/config.py             61      5    92%
+pool/cue.py               100     80    20%
+pool/event.py              18     12    33%
+pool/gamestate.py         210    170    19%
+pool/graphics.py           49     38    22%
+pool/main.py               31     31     0%
+pool/physics.py            44      7    84%
+pool/table_sprites.py      77     56    27%
+-------------------------------------------
+TOTAL                     736    501    32%
+
+
+====================== 31 passed in 0.39 seconds =======================
+```
+
+Tests for other builds and instructions on how to run the tests yourself can be found on the github repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on github^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
+
+## Other tests
+
+Other features of the game, like the rules of the game, cannot be easily tested with maths, for that purpose, I have created a test table where I actually play out the scenarios described in-game.
+
+Test description                                     Expected output                           Test type        Result                               Reference
+--------------------------------------------------   ---------------------------------------   --------------   ------------------------------------------------------------------------   ---------------
+Putting the white ball on top of another ball        Shouldn't be possible                     Erroneous        The game stops moving the ball when it come to contact with another ball
+Pressing ESC in-game                                 Return to the main menu                   Typical          The game returns to the main menu
+Pressing ESC in the main menu                        Exit the game                             Typical          The game terminates
+Trying to extend the cue past what the game allows   The game should limit the cue extension   Extreme          The game stops the cue extending at a certain point
+Clicking the cue without extending it                The ball shouldn't move                   Extreme          The ball moves towards the cue
+--------------------------------------------------   ---------------------------------------   --------------   ----------------------------------   ---------------
 
 # Evaluation
 
 ## Objective Analysis
 
-## User Feedback:
+## User Feedback
 
-## Analysis of User Feedback:
+## Analysis of User Feedback
 
-## Possible Extensions:
+## Possible Extensions
