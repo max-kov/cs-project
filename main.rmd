@@ -1,23 +1,32 @@
 ---
 title: Computer Science project.
 author: Maksims Kovalovs
-output: html_document
+output:
+  html_document:
+    toc: true
+    toc_depth: 2
+    toc_float: true
+    theme: paper
 ---
 
 # Analysis
 
-## Description of Current System
-Most pool game are hosted on flash game websites like miniclip.com, and others, unfortunately these websites do not provide you with game files, and you have to play the game in your browser. This is bad not only because that does not allow for any customisation for the game files if the user wants to do so, but also players dont know how the physics of the game works, for example the players dont know the friction coefficients between the balls and the table which means that the game experience could deviate from the one the players used to in real life.
+## Description of Currently Available Games
+
+Most pool game are hosted on flash game websites like miniclip.com, and others.Unfortunately, these websites do not provide you with game files and you have to play the game in your browser. This is bad, not only because that does not allow for any customisation of the game files, but also the players don't know how the physics of the game works, for example the players don't know the friction coefficients between the balls and the table, which means that the game experience could deviate from the one the players used to in real life. Most games are played via the internet, sometimes there is an option to play against an AI opponent.
 
 ## Identification of End Users
+
 The primary use for this project is for pool game enthusiasts who want the ability to customise their experience to their needs. The casual pool game players will enjoy the game as well, but these people already have a lot of options available to them online.
 
 ## User Needs
+
 Make the constumisable options of the game like the friction coefficients easily accesible in the config file, so that even people without coding experience could adjust the values.
 The game should be open source so that people who are interested in the inner workings of the game could analyse it.
 
 ## Acceptable Limitations
-The purpose of the game is to provide a highly customisable experience, and thus the actual graphics of the game might be less appealing than other games online.
+
+The purpose of the game is to provide a highly customisable experience, and thus the actual graphics of the game might be less appealing than other games online. AI opponents and playing the game via the internet out of the scope of this project. Usually, it is not hard to develop a simple multiplayer game which you can played over the internet, however, in my case, I am developing the game without a game engine, which would mean that I would have to deal with network protocols and other things related to networks too.
 
 ## Object diagram
 
@@ -43,12 +52,16 @@ The game would be written in python and some additional libraries:
 * Zope.Event
 
 ### Pygame
+
 Python has a library called turtle that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the pygame website
 Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, pygame is highly portable and runs on nearly every platform and operating system.
 
 ### Numpy
+
 Numpy is a powerful tool for numerical calculations often involving matrices. In this project matrices are used for drawing the ball sprites, specifically 3d rotation matrices.
+
 ## Evidence of Analysis
+
 Physics behind the simulation
 The game will have to resolve elastic ball collisions and other physical processes. The balls will be modeled To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online. (<https://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php> and <https://en.wikipedia.org/wiki/Elastic_collision> )
 
