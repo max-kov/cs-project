@@ -7,6 +7,9 @@ output:
         toc_depth: 2
         toc_float: true
         theme: paper
+bibliography: references.bib
+link-citations: yes
+csl: refstyle.csl
 ---
 
 # Analysis
@@ -18,7 +21,7 @@ This project is for the most part an investigation into 3d rendering and physica
 ## Identification of End Users
 
 The main end users of this project are my school friends who are interested in playing a computer version of pool.
-My project will be hosted on GitHub, so other people can play the game for free.
+My project will be hosted on GitHub [@githubrepo], so other people can play the game for free.
 
 ## Objectives
 
@@ -36,15 +39,15 @@ My project will be hosted on GitHub, so other people can play the game for free.
 
 The project has a lot of different classes, and I have made object diagrams from every file in the project.
 
-![cue.py](object_diagram_cue.png)
+![cue.py](figures/object_diagram_cue.png)
 
-![event.py](object_diagram_event.png)
+![event.py](figures/object_diagram_event.png)
 
-![graphics.py](object_diagram_graphics.png)
+![graphics.py](figures/object_diagram_graphics.png)
 
-![ball.py](object_diagram_ball.png)
+![ball.py](figures/object_diagram_ball.png)
 
-![table_sprites.py](object_diagram_tablesprites.png)
+![table_sprites.py](figures/object_diagram_tablesprites.png)
 
 ## Proposed Solution
 
@@ -66,7 +69,7 @@ Numpy is a powerful tool for numerical calculations often involving matrices. In
 
 ## Evidence of Analysis
 
-The game will have to resolve elastic ball collisions and other physical processes. To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online^[https://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php] ^[https://en.wikipedia.org/wiki/Elastic_collision].
+The game will have to resolve elastic ball collisions and other physical processes. To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online[@wiki_elasticcollisions][@gamasutra].
 
 ## Critical Path
 To make the development easier, I'm going to split the program in 4 stages:
@@ -93,15 +96,15 @@ To make the development easier, I'm going to split the program in 4 stages:
 
 One way detect a ball to ball collision is to check every frame the distances between every ball and, if the distance between two balls is less that the sum of their radii, that means that they have collided.
 
-![naive collision](ball_collision1.png)
+![naive collision](figures/ball_collision1.png)
 
 Unfortunately, such a strategy sometimes makes the balls "stick" to each other. That is because this strategy doesn't take into consideration the direction the balls are going. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
 
-![collision with velocities](ball_collision2.png)
+![collision with velocities](figures/ball_collision2.png)
 
 We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the displacement difference between 2 balls^[take away the displacement vector of the first ball from the second one] and the velocity difference vector (labeled as v1-v2 on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
-![collision with dot product](ball_collision3.png)
+![collision with dot product](figures/ball_collision3.png)
 
 ### Collision resolve
 
@@ -112,28 +115,26 @@ There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ 
 
 * Ball to ball:
   Using the law of the conservation of momentum we do
-  `m1*u1 + m2*u2 = m1*v1 + m2*v2`
+  $$m_1*u_1 + m_2*u_2 = m_1*v_1 + m_2*v_2$$
   Normally to calculate the ball collision vectors you would have to consider kinetic energies and momentum to resolve properly, but if the masses of the balls are the same you could do a shortcut.
+  \begin{align}
+  m*u_1 + m*u_2 &= m*v_1 + m*v_2\\
+  u_1 + u_2 &= v_1 + v_2\\
+  v_1 - u_1 &= -(v_2 - u_2)\\
+  \Delta v_1 &= -\Delta v_2
+  \end{align}
   From this we see that any change in speed in the first ball has to be provided by the second ball, in other words the change in the velocity of the first ball will equal to change of the velocity of the second ball. When a ball collides with a ball the force on the balls goes through the collision point between the balls. Furthermore, since we are modeling elastic collisions we know that initial and final velocity will be equal, therefore the component of the balls velocity that goes through the collision point is flipped.
 
 
 ### Cue stick click detection
 Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
 
-$$
-\begin{align}
-m*u1 + m*u2 &= m*v1 + m*v2
-u1 + u2 &= v1 + v2\\
-v1 - u1 &= -(v2 - u2)\\
-v1 &= -v2
-\end{align}
-$$
 
-![click inside cue](cue1.png)
+![click inside cue](figures/cue1.png)
 
 The area of the green triangles equals the area of the cue, therefore the click is inside the cue.
 
-![click outside cue](cue2.png)
+![click outside cue](figures/cue2.png)
 
 ### The main game loop
 
@@ -160,11 +161,11 @@ This is the whole game split into functions. Every turn, one player uses the cue
 ## User Interface
 The game has a very minimal user interface. The game has a small main menu.
 
-![main menu](main_menu.png)
+![main menu](figures/main_menu.png)
 
 The menu only has two buttons - *Play Pool*, upon clicking which the game starts, and *Exit* which exits the game. The buttons change color when the player mouses over the button.
 
-![main menu mouseover](main_menu_button.png)
+![main menu mouseover](figures/main_menu_button.png)
 
 Even though the menu is very minimal, it is very customizable. Many things can be customized in the menu section in the config file (config.py).
 
@@ -193,7 +194,7 @@ exit_button = 3
 play_game_button = 1
 ...
 ```
-![main menu test](main_menu_test.png)
+![main menu test](figures/main_menu_test.png)
 
 ## Design  considerations
 
@@ -218,7 +219,7 @@ Judging from other computer games, the pool game should include these things:
 * The balls will have a function which will generate the ball sprite depending on the position and the movement of the ball.
 * Functions which are responsible for checking that the game rules are not broken.
 
-![game flow](game_flowchart.png)
+![game flow](figures/game_flowchart.png)
 
 ## File structure
 The project contains many files, all of them have a special purpose.
@@ -236,7 +237,7 @@ Sprites table pieces like the table side and holes.
 ## Input Validation
 In the game there is a special case  where there is a need for extra validation. When the player is allowed to move the ball, we must make sure that the player doesn’t move the ball outside of the game border or into another ball.
 
-![bad ball placement](table.png)
+![bad ball placement](figures/table.png)
 
 # Technical solution
 
@@ -330,7 +331,7 @@ def test_movement4(self):
     assert not physics.ball_collision_check(ball1, ball2)
 ```
 
-![test1](test1.png)
+![test1](figures/test1.png)
 
 The test sets the balls such that they are touching, however, both balls are moving with the same velocity. That means there is no collision.
 
@@ -346,7 +347,7 @@ def test_movement10(self):
 
 The values in the test are exaggerated so that we know that the game can handle extreme values.
 
-![test2](test2.png)
+![test2](figures/test2.png)
 
 ### To run the tests
 
@@ -413,3 +414,5 @@ Clicking the cue without extending it                The ball shouldn't move    
 ## Analysis of User Feedback
 
 ## Possible Extensions
+
+# References
