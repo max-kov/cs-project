@@ -16,12 +16,16 @@ csl: refstyle.csl
 
 ## Introduction
 
-This project is for the most part an investigation into 3d rendering and physical simulation of rolling balls. To make the project more interactive it will take a form of a simple 2-player 2d pool game.
+This project is about making a simple 8 ball pool game with a top down view. The game will:
+
+* be played by 2 people on a single computer
+* have use the standard pool rule set
+* have realistic ball animations and behaviour (such as realistic collisions and friction)
 
 ## Identification of End Users
 
 The main end users of this project are my school friends who are interested in playing a computer version of pool.
-My project will be hosted on GitHub [@githubrepo], so other people can play the game for free.
+My project will be hosted on GitHub[@githubrepo], so other people can play the game for free.
 
 ## Objectives
 
@@ -34,6 +38,60 @@ My project will be hosted on GitHub [@githubrepo], so other people can play the 
 * Game animations look realistic:
   * The balls should visibly *rotate* when moving
   * The cue should move towards the ball when a player is hitting a ball
+
+
+## Proposed Solution
+
+### Language Choice:
+At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
+According to the Tiobe Index (https://www.tiobe.com/tiobe-index/) and PYPL (http://pypl.github.io/PYPL.html), python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, python is a duck-typed language, which means no explicit type declarations are required. This makes python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development. Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework.
+A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
+
+The game will be written in Python and some additional libraries:
+
+* Pygame
+* Numpy
+* Zope.Event
+
+#### Pygame
+
+Python has an in-build library called turtle[@pythonturtle], however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. I will be using Pygame for this projects, because of aforementioned reasons.
+
+#### Numpy
+
+Numpy[@numpy] is a powerful tool for numerical calculations often involving matrices. In this project matrices are used for drawing the ball sprites, specifically 3d rotation matrices.
+
+#### Zope.event
+This[@zope] is a very simple event handling/posting module.It will be used to handle in-game events, like potted balls or collisions.
+
+### Pool rules
+To implement the rules of pool I had to go online and read about the game rules[@poolrules], here are the main points:
+
+* The first break should be performed behind the white line on the table, and the ball may be placed anywhere behind that line.
+* If the players haven't decided which group of balls they are on, and the player pots a ball or several balls of a particular group, that player now is on that group.
+* To win the game, you must pot the 8 ball legally.
+* You must first sink every ball from the group you are on, to pot the 8 ball.
+* Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit *from his hand* (which means that he is allowed to put the white ball anywhere on the table)
+* If you pot the 8 ball illegally, you lose the game automatically.
+
+### Collisions
+There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
+To understand the maths behind the collisions I will use my knowledge from maths Mechanics 1 and 2 modules and the information I found online[@wiki_elasticcollisions][@gamasutra]. The program will use physical ideas like Newtons laws and conservation of momentum to implement realistic collisions (an in-depth explanation of the collision algorithm can be found in the Algorithms section.)
+
+### Rendering
+Some parts of the balls will be modeled as 3d objects, and then projected on the table (into a 2d space). For instance, some balls will have a stripe around them. That stripe will be modeled as an array of 3d points, which will be rotated using rotation matrices when the ball is moving and later projected on the 2d table(an in-depth explanation of rendering can be found in the Algorithms section.)
+
+### Other
+I will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. Additionally, the game should have a configuration file where some of the game values can be changed.
+
+## Critical Path
+To make the development easier, I'm going to split the program in 4 stages:
+* In the first stage I will implement the general shapes and objects - the table the balls. The balls will have position and velocity vectors but collisions at this stage of the game will be ignored
+* In the second stage I will ball collisions with the table and with other balls.
+* In the third stage I will add the cue stick and the table pockets. The physics of the game should be finished after this stage.
+* In the fourth and final stage I will add the "game" parts of the game, namely, pool rules (stuff like player turns and whether you are allowed to move the white ball on your turn) and a main menu.
+
+# Documented design
 
 ## Object diagram
 
@@ -48,37 +106,6 @@ The project has a lot of different classes, and I have made object diagrams from
 ![ball.py](figures/object_diagram_ball.png)
 
 ![table_sprites.py](figures/object_diagram_tablesprites.png)
-
-## Proposed Solution
-
-The program will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
-The game would be written in python and some additional libraries:
-
-* Pygame
-* Numpy
-* Zope.Event
-
-### Pygame
-
-Python has a library called turtle that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the Pygame website
-Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, Pygame is highly portable and runs on nearly every platform and operating system.
-
-### Numpy
-
-Numpy is a powerful tool for numerical calculations often involving matrices. In this project matrices are used for drawing the ball sprites, specifically 3d rotation matrices.
-
-## Evidence of Analysis
-
-The game will have to resolve elastic ball collisions and other physical processes. To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online[@wiki_elasticcollisions][@gamasutra].
-
-## Critical Path
-To make the development easier, I'm going to split the program in 4 stages:
-* In the first stage I will implement the general shapes and objects - the table the balls. The balls will have position and velocity vectors but collisions at this stage of the game will be ignored
-* In the second stage I will ball collisions with the table and with other balls.
-* In the third stage I will add the cue stick and the table pockets. The physics of the game should be finished after this stage.
-* In the fourth and final stage I will add the "game" parts of the game, namely, pool rules (stuff like player turns and whether you are allowed to move the white ball on your turn) and a main menu.
-
-# Documented design
 
 ## Overall System Design
 
