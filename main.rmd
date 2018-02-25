@@ -2,31 +2,35 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-  html_document:
-    toc: true
-    toc_depth: 2
-    toc_float: true
-    theme: paper
+    html_document:
+        toc: true
+        toc_depth: 2
+        toc_float: true
+        theme: paper
 ---
 
 # Analysis
 
-## Description of Currently Available Games
+## Introduction
 
-Most pool game are hosted on flash game websites like miniclip.com, and others.Unfortunately, these websites do not provide you with game files and you have to play the game in your browser. This is bad, not only because that does not allow for any customisation of the game files, but also the players don't know how the physics of the game works, for example the players don't know the friction coefficients between the balls and the table, which means that the game experience could deviate from the one the players used to in real life. Most games are played via the internet, sometimes there is an option to play against an AI opponent.
+This project is for the most part an investigation into 3d rendering and physical simulation of rolling balls. To make the project more interactive it will take a form of a simple 2-player 2d pool game.
 
 ## Identification of End Users
 
-The primary use for this project is for pool game enthusiasts who want the ability to customise their experience to their needs. The casual pool game players will enjoy the game as well, but these people already have a lot of options available to them online.
+The main end users of this project are my school friends who are interested in playing a computer version of pool.
+My project will be hosted on GitHub, so other people can play the game for free.
 
-## User Needs
+## Objectives
 
-Make the constumisable options of the game like the friction coefficients easily accesible in the config file, so that even people without coding experience could adjust the values.
-The game should be open source so that people who are interested in the inner workings of the game could analyse it.
-
-## Acceptable Limitations
-
-The purpose of the game is to provide a highly customisable experience, and thus the actual graphics of the game might be less appealing than other games online. AI opponents and playing the game via the internet out of the scope of this project. Usually, it is not hard to develop a simple multiplayer game which you can played over the internet, however, in my case, I am developing the game without a game engine, which would mean that I would have to deal with network protocols and other things related to networks too.
+* The rules of pool should be implemented in the game
+* The game should run at more than 30 FPS
+* Game mechanics should closely represent real-world behaviour:
+  * The game should be able to detect ball collisions
+  * The game should be able to resolve ball to ball collisions according to Newtons Laws
+  * The game should be able to resolve collisions with the pool table
+* Game animations look realistic:
+  * The balls should visibly *rotate* when moving
+  * The cue should move towards the ball when a player is hitting a ball
 
 ## Object diagram
 
@@ -44,7 +48,7 @@ The project has a lot of different classes, and I have made object diagrams from
 
 ## Proposed Solution
 
-Create an open source game with a configuration file to suit user needs. The program will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
+The program will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The program will store the information about the state of the game, which will mostly consist of the coordinates and the velocity of the pool balls on the table. There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
 The game would be written in python and some additional libraries:
 
 * Pygame
@@ -53,8 +57,8 @@ The game would be written in python and some additional libraries:
 
 ### Pygame
 
-Python has a library called turtle that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the pygame website
-Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, pygame is highly portable and runs on nearly every platform and operating system.
+Python has a library called turtle that is part of the standard python installation, however it’s mainly for education purposes and does not nearly have the functionality for making a pool game. Here is an except from the Pygame website
+Pygame (the library) is a Free and Open Source python programming language library for making multimedia applications like games built on top of the excellent SDL library. Like SDL, Pygame is highly portable and runs on nearly every platform and operating system.
 
 ### Numpy
 
@@ -62,24 +66,10 @@ Numpy is a powerful tool for numerical calculations often involving matrices. In
 
 ## Evidence of Analysis
 
-Physics behind the simulation
-The game will have to resolve elastic ball collisions and other physical processes. The balls will be modeled To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online. (<https://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php> and <https://en.wikipedia.org/wiki/Elastic_collision> )
-
-## Similar games currently available
-I’ve studied some pool games online to get an idea what features I could add to my program, which are missing from the majority of games available online. The main problems with pool games online are:
-There is a plethora of games which are closed source, but it’s hard to find the source code online. By making the game open-source the users will gain the ability to study the inner- workings of the game. The code of the game can be used to study other things besides computers and code, for instance my game could be used to simulate famous Newtons cradle experiment, by removing friction.
-The games cannot be edited/configured. By limiting the ability of changing the inner- workings of the game the user might not get the experience he wants, for example the user might want to practise a specific kind of shot, do trick shots or change the size and the colour of the balls. By making an open-source game the user can change everything!
-
-## Objectives
-* Create a main menu at start of the game
-* Allow the game to be played by two players
-* The user can change the following game constants through the config file:
-    * The size of the balls by changing the ball size integer in the Config file
-    * The colour of the balls
-
+The game will have to resolve elastic ball collisions and other physical processes. To understand the maths behind the collisions I will mainly use my knowledge from maths Mechanics 1 and 2 modules but I will also research the topic online^[https://www.gamasutra.com/view/feature/131424/pool_hall_lessons_fast_accurate_.php] ^[https://en.wikipedia.org/wiki/Elastic_collision].
 
 ## Critical Path
-To make the development easier, im going to split the program in 4 stages:
+To make the development easier, I'm going to split the program in 4 stages:
 * In the first stage I will implement the general shapes and objects - the table the balls. The balls will have position and velocity vectors but collisions at this stage of the game will be ignored
 * In the second stage I will ball collisions with the table and with other balls.
 * In the third stage I will add the cue stick and the table pockets. The physics of the game should be finished after this stage.
@@ -109,31 +99,35 @@ Unfortunately, such a strategy sometimes makes the balls "stick" to each other. 
 
 ![collision with velocities](ball_collision2.png)
 
-We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the displacement difference between 2 balls^[take away the dispalacement vector of the first ball from the second one] and the velocity difference vector (labeled as v1-v2 on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
+We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the displacement difference between 2 balls^[take away the displacement vector of the first ball from the second one] and the velocity difference vector (labeled as v1-v2 on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
 ![collision with dot product](ball_collision3.png)
 
 ### Collision resolve
 
-There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are actually closely related. Both types are resolved using newtonian physics.
+There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are actually closely related. Both types are resolved using Newtonian physics.
 
 * Ball to line:
-  When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed (multiplied by -1). The component parralel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
+  When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed (multiplied by -1). The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
 * Ball to ball:
-  Using the law of the conservation of momemtum we do
+  Using the law of the conservation of momentum we do
   `m1*u1 + m2*u2 = m1*v1 + m2*v2`
-  Normaly to calculate the ball collision vectors you would have to consider kinetic energies and momentum to resolve properly, but if the masses of the balls are the same you could do a shortcut.
-  ```
-  m*u1 + m*u2 = m*v1 + m*v2
-  u1 + u2 = v1 + v2
-  v1 - u1 = -(v2 - u2)
-  Δv1 = -Δv2
-  ```
+  Normally to calculate the ball collision vectors you would have to consider kinetic energies and momentum to resolve properly, but if the masses of the balls are the same you could do a shortcut.
   From this we see that any change in speed in the first ball has to be provided by the second ball, in other words the change in the velocity of the first ball will equal to change of the velocity of the second ball. When a ball collides with a ball the force on the balls goes through the collision point between the balls. Furthermore, since we are modeling elastic collisions we know that initial and final velocity will be equal, therefore the component of the balls velocity that goes through the collision point is flipped.
 
+
 ### Cue stick click detection
-Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the sarea of triangles using herons formula.
+Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
+
+$$
+\begin{align}
+m*u1 + m*u2 &= m*v1 + m*v2
+u1 + u2 &= v1 + v2\\
+v1 - u1 &= -(v2 - u2)\\
+v1 &= -v2
+\end{align}
+$$
 
 ![click inside cue](cue1.png)
 
@@ -176,7 +170,7 @@ Even though the menu is very minimal, it is very customizable. Many things can b
 
 ```
 ...
-# menu
+\# menu
 menu_text_color = (255, 255, 255)
 menu_text_selected_color = (0, 0, 255)
 menu_title_text = "Pool"
@@ -191,7 +185,7 @@ play_game_button = 1
 ```
 For example, to add a new button, you need to add a new string to `menu_buttons` array. And change the exit_button and the play_game_button variables. The variable exit_button has the index of the "exit button" which, when is clicked, closes the game.
 ```
-# menu
+\# menu
 ...
 menu_buttons = ["Play Pool", "Test", "Exit"]
 ...
