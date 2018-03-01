@@ -30,6 +30,8 @@ Therefore, this project will deal with 3d rendering, physical simulation and gam
 The main end users of this project are my school friends who are interested in playing a computer version of pool.
 My project will be hosted on GitHub[@githubrepo], so other people can play the game for free.
 
+## Evidence of analysis
+
 To better understand the problem I had to solve, I decided to interview one of my sixth form classmates about it:
 
 __What are you having problems at the moment?__
@@ -42,7 +44,7 @@ _We have found some pool games online, but most of them are player vs AI and req
 
 __Is there anything specific you want in the game?__
 
-_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to mess around with the game options like cue hit power or the ball size._
+_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to tweak with the game options like cue hit power or the ball size._
 
 The user asked for standard features for this game, except for the sandbox mode. That can be achieved in different ways, like an in-game or a configuration file, which is present in many new games. Other than that request, the user needs mostly reflect ones outlined in *Introduction*.
 
@@ -51,9 +53,8 @@ The user asked for standard features for this game, except for the sandbox mode.
 * The rules of pool should be implemented in the game
 * The game should run at more than 30 frames per second
 * Physical interactions in the game should be realistic:
-  * The game should correctly model ball collisions
-  * The game should be able to resolve ball to ball collisions according to Newtons Laws
-  * The game should be able to resolve collisions with the pool table
+  * The movement of the balls should be affected by friction
+  * The game should detect and resolve ball to ball and ball to table side collisions
 * Game animations look realistic:
   * The balls should visibly *rotate* when moving
   * The cue should move towards the ball when a player is hitting a ball
@@ -61,12 +62,12 @@ The user asked for standard features for this game, except for the sandbox mode.
 
 ## Proposed Solution
 
-### Language Choice:
+### Language Choice
 At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
 According to the Tiobe Index[@tiobe] and PYPL[@pypl], python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, python is a duck-typed language, which means no explicit type declarations are required. This makes python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development. Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework.
 A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
 
-### Pool rules
+### Pool Rules
 To implement the rules of pool I had to go online and read about the game rules[@poolrules], here are the main points:
 
 * The first break should be performed behind the white line on the table, and the ball may be placed anywhere behind that line.
@@ -74,17 +75,17 @@ To implement the rules of pool I had to go online and read about the game rules[
 * To win the game, you must pot the 8 ball legally.
 * You must first sink every ball from the group you are on, to pot the 8 ball.
 * Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit *from his hand* (which means that he is allowed to put the white ball anywhere on the table)
-* If you pot the 8 ball illegally, you lose the game automatically.
+* If you pot the 8 ball illegally, you lose the game.
 
 ### Collisions
-There will be 3 types of collision - ball to ball, ball to table side and ball to table hole. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
-To understand the maths behind the collisions I will use my knowledge from maths Mechanics 1 and 2 modules and the information I found online[@wiki_elasticcollisions][@gamasutra]. The program will use physical ideas like Newtons laws and conservation of momentum to implement realistic collisions (an in-depth explanation of the collision algorithm can be found in the Algorithms section.)
+There will be 3 types of collision - ball to ball, ball to table side and ball to pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
+To understand the maths behind the collisions I will use my knowledge from M1 and M2 modules of my mathematics course and the information I found online[@wiki_elasticcollisions][@gamasutra]. The program will use physical ideas like Newtons laws and conservation of momentum to implement realistic collisions.
 
 ### Rendering
-Some parts of the balls will be modeled as 3d objects, and then projected on the table (into a 2d space). For instance, some balls will have a stripe around them. That stripe will be modeled as an array of 3d points, which will be rotated using rotation matrices when the ball is moving and later projected on the 2d table(an in-depth explanation of rendering can be found in the Algorithms section.)
+Some parts of the balls will (like the white stripe around the balls) be modeled as 3d objects,rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space).
 
-### Other
-I will implement classes for better code readability and maybe even some of the harder OOP ideas like overloading. The game will then store most game objects as objects, which will make the development process easier. For example, there will be a ball object, with position and velocity vectors and a method which calculates the new position vector after a single frame. Additionally, the game should have a configuration file where some of the game values can be changed.
+### Cue
+The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
 
 # Documented design
 
@@ -157,6 +158,9 @@ Because the cue stick is modeled as a rectangle, the problem here can be simplif
 The area of the green triangles equals the area of the cue, therefore the click is inside the cue.
 
 ![click outside cue](figures/cue2.png)
+
+### Friction
+
 
 ### The main game loop
 
