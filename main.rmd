@@ -87,6 +87,16 @@ Some parts of the balls will (like the white stripe around the balls) be modeled
 ### Cue
 The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
 
+### Friction
+There are 2 friction types in my program:
+
+* Movement friction (balls loosing energy because of friction with the table)
+* Collision friction (balls loosing energy because of internal friction on collision)
+
+To model movement friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
+
+To model friction on collision, I will use the inelastic collision formula[@collisionfriction]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of energy lost in collision and visa versa.
+
 # Documented design
 
 ## Object diagram
@@ -115,42 +125,52 @@ The project has a lot of different classes, and I have made object diagrams from
 
 ### Collision detection
 
-One way detect a ball to ball collision is to check every frame the distances between every ball and, if the distance between two balls is less that the sum of their radii, that means that they have collided.
+One way detect a ball to ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
 
 ![naive collision](figures/ball_collision1.png)
 
-Unfortunately, such a strategy sometimes makes the balls "stick" to each other. That is because this strategy doesn't take into consideration the direction the balls are going. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
+Unfortunately, this strategy doesn't always work. That is because this strategy doesn't take into consideration the direction the balls are going. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
 
 ![collision with velocities](figures/ball_collision2.png)
 
-We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the displacement difference between 2 balls^[take away the displacement vector of the first ball from the second one] and the velocity difference vector (labeled as v1-v2 on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
+We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
 ![collision with dot product](figures/ball_collision3.png)
 
 ### Collision resolution
 
-There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are actually closely related. Both types are resolved using Newtonian physics.
+There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are somewhat similar. Both types are resolved using Newtonian physics.
 
-* Ball to line:
-  When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed (multiplied by -1). The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
+#### Ball to line:
 
-* Ball to ball:
-  Using the law of the conservation of momentum we do
-  $$m_1*u_1 + m_2*u_2 = m_1*v_1 + m_2*v_2$$
-  Normally to calculate the ball collision vectors you would have to consider kinetic energies and momentum to resolve properly, but if the masses of the balls are the same you could do a shortcut.
-  $$
-  \begin{align}
-  m*u_1 + m*u_2 &= m*v_1 + m*v_2\\
-  u_1 + u_2 &= v_1 + v_2\\
-  v_1 - u_1 &= -(v_2 - u_2)\\
-  \Delta v_1 &= -\Delta v_2
-  \end{align}
-  $$
-  From this we see that any change in speed in the first ball has to be provided by the second ball, in other words the change in the velocity of the first ball will equal to change of the velocity of the second ball. When a ball collides with a ball the force on the balls goes through the collision point between the balls. Furthermore, since we are modeling elastic collisions we know that initial and final velocity will be equal, therefore the component of the balls velocity that goes through the collision point is flipped.
+When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
+#### Ball to ball:
+
+If we get the projections of the velocity of the ball onto the vector which goes from the centre of the first circle to the second circle, we see that only one of the components of the velocity will be affected (only _V1_ will be changed on the figure). This is because there is only 1 point of interaction between the balls, meaning any forces will have to go from the centre of mass of a ball, through that point.
+
+![ball collision example](figures/ball_friction1.png)
+
+The result is that we can use 1-dimensional collision formulas here, even though we have a 2-dimensional collision. We do that by only considering the velocity component which goes through the collision point (_V1_) and leave the other velocity component unchanged (_V2_ on the figure).
+
+The general formula for a 1-dimensional collision is[@collisionfriction]:
+$$
+V'_1=\frac{(1+e)M_1}{M_1+M_2}V_2
+$$
+Where $e$ is the coefficient of restitution (explained in analysis), $M_1$ and $M_2$ are the masses of the first and second balls, respectively. $V'_1$ is the velocity of the first ball after the collision and $V_2$ is the velocity of the second ball prior to the collision.
+
+In our case, the masses of the balls are all the same, which gives us:
+$$
+V'_1=\frac{(1+e)}{2}V_2
+$$
+To summarise, we split the ball velocities into 2 vectors: one vector - $V_a$, which goes through the collision point and the other vector - $V_b$, which is at 90 degrees to the first vector , then the formula for the velocity after the collision is:
+$$
+V'_1=\frac{(1+e)}{2}V_{a2}+V_{b1}
+$$
 
 ### Cue stick click detection
-Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
+
+Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
 
 
 ![click inside cue](figures/cue1.png)
@@ -158,8 +178,6 @@ Because the cue stick is modeled as a rectangle, the problem here can be simplif
 The area of the green triangles equals the area of the cue, therefore the click is inside the cue.
 
 ![click outside cue](figures/cue2.png)
-
-### Friction
 
 
 ### The main game loop
