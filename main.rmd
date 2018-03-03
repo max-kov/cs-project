@@ -129,11 +129,11 @@ One way detect a ball to ball collision is to check the distances between every 
 
 ![naive collision](figures/ball_collision1.png)
 
-Unfortunately, this strategy doesn't always work. That is because this strategy doesn't take into consideration the direction the balls are going. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
+Unfortunately, this strategy doesn't always work. That is because this strategy doesn't take into consideration the direction of the balls velocity. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
 
 ![collision with velocities](figures/ball_collision2.png)
 
-We have to consider the directions of the balls velocities to detect collisions accurately. To do that we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
+To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
 ![collision with dot product](figures/ball_collision3.png)
 
@@ -171,7 +171,6 @@ $$
 ### Cue stick click detection
 
 Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
-
 
 ![click inside cue](figures/cue1.png)
 
