@@ -99,28 +99,6 @@ To model friction on collision, I will use the inelastic collision formula[@coll
 
 # Documented design
 
-## Object diagram
-
-The project has a lot of different classes, and I have made object diagrams from every file in the project.
-
-![cue.py](figures/object_diagram_cue.png)
-
-![event.py](figures/object_diagram_event.png)
-
-![graphics.py](figures/object_diagram_graphics.png)
-
-![ball.py](figures/object_diagram_ball.png)
-
-![table_sprites.py](figures/object_diagram_tablesprites.png)
-
-## Modular Design
-
-* Main menu
-  * The game
-    * Stop the game
-    * Game over
-  * Quit the game
-
 ## Algorithms
 
 ### Rendering
@@ -229,6 +207,37 @@ This is the whole game split into functions. Every turn, one player uses the cue
 
 ## User Interface
 
+The game will have a simple main menu which allow the user to exit the game or start the game. In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have ball indicators, which will tell the players which balls they need to pot to win the game.
+
+### Modular Design
+
+* Main menu
+  * The game
+    * Stop the game
+    * Game over
+  * Quit the game
+
+## Game objects and classes
+
+The game will be split into objects. There will be a main *game_state* class, which contains properties and methods which are related to the state of the game.
+
+![game_state](figures/object_diagram_gamestate.png)
+
+Every object game object will have its own class.
+
+![cue](figures/object_diagram_cue.png)
+
+![ball](figures/object_diagram_ball.png)
+
+![table_sprites](figures/object_diagram_tablesprites.png)
+
+There will also be supplementary classes, which are used by the game_state class.
+
+![event.py](figures/object_diagram_event.png)
+
+![graphics.py](figures/object_diagram_graphics.png)
+
+
 ## Design  considerations
 
 Judging from other computer games, the pool game should include these things:
@@ -253,19 +262,6 @@ Judging from other computer games, the pool game should include these things:
 * Functions which are responsible for checking that the game rules are not broken.
 
 ![game flow](figures/game_flowchart.png)
-
-## File structure
-The project contains many files, all of them have a special purpose.
-
-* main.py is the main game file which uses every other file to make the game run
-* collision.py is the file responsible for detecting various collisions, like ball to ball and ball to table side collisions.
-* ball.py contains the Ball class.
-* gamestate.py contains the game state class, which has various functions related to actual game flow like the rules of the game.
-* config.py the configuration file which contains most of the constants of the game Most classes are in separate classes for ease of reading.
-
-Ball the ball class contains all of the methods associated with the pool ball, like sprite manipulation algorithms, position properties and others.
-Game State has various functions related to actual game flow like the rules of the game.
-Sprites table pieces like the table side and holes.
 
 ## Input Validation
 In the game there is a special case  where there is a need for extra validation. When the player is allowed to move the ball, we must make sure that the player doesn’t move the ball outside of the game border or into another ball.
