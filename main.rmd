@@ -88,10 +88,7 @@ Some parts of the balls will (like the white stripe around the balls) be modeled
 The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
 
 ### Friction
-There are 2 friction types in my program:
-
-* Movement friction (balls loosing energy because of friction with the table)
-* Collision friction (balls loosing energy because of internal friction on collision)
+There are 2 friction types in my program: movement friction and collision friction.
 
 To model movement friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
 
@@ -113,9 +110,9 @@ The ball can be split in 3 parts which must be rendered separately:
 
 ![A possible position of the ball](figures/ball2.png)
 
-The main body of the ball, is a big circle we put everything else on top. A pure sphere of a solid color will look like a circle from any angle in a 2-dimensional system. That's why we don't need to worry about any transformations here.
+The main body of the ball, is a big circle we put everything else on top. A pure sphere of a solid color will look like a circle from any angle in a 2-dimensions. That's why we don't need to worry about any transformations here.
 
-The line on the side ball is rendered by setting many 3-dimensional around the balls circumference when it is initialised and then using rotation matrices to transform the points. The 3d matrix is calculated using a line-angle formula. We know the line around which the ball will be rotating - it is the line perpendicular to the velocity vector and the angle of rotation is calculated using the formula
+The line on the side of the ball is rendered by setting many 3-dimensional around the balls circumference when it is initialised and then translated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and the angle of rotation is calculated using the formula
 $$
 \theta=\frac{vt}{r}
 $$
@@ -123,7 +120,7 @@ where $v$ is the linear speed of the ball and $r$ is the radius of the circle wi
 
 Every frame the rotation matrix is calculated and applied to the line. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Other points are traced with a line.
 
-The main body will be tracked with a single point. That point will be in the centre of the ball when it's initialised and will be translated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
+The label will be tracked with a single point. That point will be in the centre of the ball when it's initialised and will be translated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
 
 
 ### Collision detection
@@ -229,13 +226,13 @@ Every object game object will have its own class.
 
 ![ball](figures/object_diagram_ball.png)
 
-![table_sprites](figures/object_diagram_tablesprites.png)
+![table sprites](figures/object_diagram_tablesprites.png)
 
 There will also be supplementary classes, which are used by the game_state class.
 
-![event.py](figures/object_diagram_event.png)
+![events](figures/object_diagram_event.png)
 
-![graphics.py](figures/object_diagram_graphics.png)
+![graphics](figures/object_diagram_graphics.png)
 
 
 ## Design  considerations
@@ -264,7 +261,7 @@ Judging from other computer games, the pool game should include these things:
 ![game flow](figures/game_flowchart.png)
 
 ## Input Validation
-In the game there is a special case  where there is a need for extra validation. When the player is allowed to move the ball, we must make sure that the player doesn’t move the ball outside of the game border or into another ball.
+In the game there is a special case  where there is a need for extra validation. When the player is allowed to move the ball, we must make sure that the player does not move the ball outside of the game border or into another ball.
 
 ![bad ball placement](figures/table.png)
 
@@ -277,7 +274,7 @@ In the game there is a special case  where there is a need for extra validation.
 This^[https://github.com/max-kov/pool/commit/872bdde305882ee68b771a3a03be3ab264d586ca] is a bug regarding the cue. If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
 
 
-All of the code is available on github.com/max-kov/pool with testing results.
+All of the code is available on github[@githubrepo] with testing results.
 
 ## collisions.py
 
@@ -342,8 +339,8 @@ cat pool/table_sprites.py
 # Testing
 
 ## White box testing (Unit testing)
-In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, and, more specificaly, unit testing, because I am testing specific functions of the program (which I wrote myself).
-To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to github. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
+In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, and, more specifically, unit testing, because I am testing specific functions of the program (which I wrote myself).
+To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
 
 ```
 def test_point_distance1(self):
@@ -386,7 +383,7 @@ The file contains many tests, including matrix transformation tests, line to bal
 cat tests/test_physics.py
 ```
 
-Here is me running the tests on my machine on the lates pool build.
+Here is me running the tests on my machine on the latest pool build.
 
 ```
 PYTHONPATH=./pool py.test --cov=.
@@ -419,7 +416,7 @@ TOTAL                     736    501    32%
 ====================== 31 passed in 0.39 seconds =======================
 ```
 
-Tests for other builds and instructions on how to run the tests yourself can be found on the github repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on github^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
+Tests for other builds and instructions on how to run the tests yourself can be found on the GitHub repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on GitHub^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
 
 
 # Evaluation
