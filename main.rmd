@@ -123,6 +123,31 @@ The project has a lot of different classes, and I have made object diagrams from
 
 ## Algorithms
 
+### Rendering
+
+The ball can be split in 3 parts which must be rendered separately:
+
+* The line on the circumference
+* The label (circle with the number)
+* The main body
+
+![Initial position of the ball](figures/ball1.png)
+
+![A possible position of the ball](figures/ball2.png)
+
+The main body of the ball, is a big circle we put everything else on top. A pure sphere of a solid color will look like a circle from any angle in a 2-dimensional system. That's why we don't need to worry about any transformations here.
+
+The line on the side ball is rendered by setting many 3-dimensional around the balls circumference when it is initialised and then using rotation matrices to transform the points. The 3d matrix is calculated using a line-angle formula. We know the line around which the ball will be rotating - it is the line perpendicular to the velocity vector and the angle of rotation is calculated using the formula
+$$
+\theta=\frac{vt}{r}
+$$
+where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given $\frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we use the formula $S=vt$ to get the aforementioned formula.
+
+Every frame the rotation matrix is calculated and applied to the line. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Other points are traced with a line.
+
+The main body will be tracked with a single point. That point will be in the centre of the ball when it's initialised and will be translated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
+
+
 ### Collision detection
 
 One way detect a ball to ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
@@ -203,42 +228,6 @@ While not_closed:
 This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do *one frame*, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
 
 ## User Interface
-The game has a very minimal user interface. The game has a small main menu.
-
-![main menu](figures/main_menu.png)
-
-The menu only has two buttons - *Play Pool*, upon clicking which the game starts, and *Exit* which exits the game. The buttons change color when the player mouses over the button.
-
-![main menu mouseover](figures/main_menu_button.png)
-
-Even though the menu is very minimal, it is very customizable. Many things can be customized in the menu section in the config file (config.py).
-
-```
-...
-# menu
-menu_text_color = (255, 255, 255)
-menu_text_selected_color = (0, 0, 255)
-menu_title_text = "Pool"
-menu_buttons = ["Play Pool", "Exit"]
-menu_margin = 20
-menu_spacing = 10
-menu_title_font_size = 40
-menu_option_font_size = 20
-exit_button = 2
-play_game_button = 1
-...
-```
-For example, to add a new button, you need to add a new string to `menu_buttons` array. And change the exit_button and the play_game_button variables. The variable exit_button has the index of the "exit button" which, when is clicked, closes the game.
-```
-# menu
-...
-menu_buttons = ["Play Pool", "Test", "Exit"]
-...
-exit_button = 3
-play_game_button = 1
-...
-```
-![main menu test](figures/main_menu_test.png)
 
 ## Design  considerations
 
