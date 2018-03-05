@@ -54,7 +54,7 @@ The user asked for standard features for this game, except for the sandbox mode.
 * The game should run at more than 30 frames per second
 * Physical interactions in the game should be realistic:
   * The movement of the balls should be affected by friction
-  * The game should detect and resolve ball to ball and ball to table side collisions
+  * The game should detect and resolve ball-ball and ball to table side collisions
 * Game animations look realistic:
   * The balls should visibly *rotate* when moving
   * The cue should move towards the ball when a player is hitting a ball
@@ -78,7 +78,7 @@ To implement the rules of pool I had to go online and read about the game rules[
 * If you pot the 8 ball illegally, you lose the game.
 
 ### Collisions
-There will be 3 types of collision - ball to ball, ball to table side and ball to pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
+There will be 3 types of collision - ball-ball, ball to table side and ball to pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
 To understand the maths behind the collisions I will use my knowledge from M1 and M2 modules of my mathematics course and the information I found online[@wiki_elasticcollisions][@gamasutra]. The program will use physical ideas like Newtons laws and conservation of momentum to implement realistic collisions.
 
 ### Rendering
@@ -110,28 +110,56 @@ The ball can be split in 3 parts which must be rendered separately:
 
 ![A possible position of the ball](figures/ball2.png)
 
-The main body of the ball, is a big circle we put everything else on top. A pure sphere of a solid color will look like a circle from any angle in a 2-dimensions. That's why we don't need to worry about any transformations here.
+The main body of the ball, is a big circle we put everything else on top. A sphere of a solid color will look like a circle from any angle in a 2-dimensions. That's why we don't need to worry about any transformations of the solid sphere component.
 
-The line on the side of the ball is rendered by setting many 3-dimensional around the balls circumference when it is initialised and then translated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and the angle of rotation is calculated using the formula
+The line on the side of the ball is rendered by setting many 3-dimensional around the balls stripe when it is initialised and then translated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and the table, and the angle of rotation is calculated using the formula
 $$
 \theta=\frac{vt}{r}
 $$
 where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given $\frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we use the formula $S=vt$ to get the aforementioned formula.
 
-Every frame the rotation matrix is calculated and applied to the line. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Other points are traced with a line.
+Transformation matrices are used to transform vectors in a specific way. For example, the matrix
+
+$$
+\begin{bmatrix}
+    cos(\theta) & -sin(\theta) \\
+    sin(\theta) & cos(\theta)
+\end{bmatrix}
+$$
+
+Rotates a vector around the origin, by angle $\theta$ counterclockwise. To perform the rotation, the vector must be multiplied by the matrix, using matrix multiplication.
+
+$$
+\begin{bmatrix}
+    cos(\theta) & -sin(\theta) \\
+    sin(\theta) & cos(\theta)
+\end{bmatrix}
+\begin{bmatrix}
+    x \\
+    y
+\end{bmatrix}
+$$
+
+The rotation matrix above is a 2d rotation matrix. I will be using 3d rotation matrices for my project. Those are slightly different, because they require an angle along with an axis of rotation. Every frame the rotation matrix is calculated and applied to the line. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Other points are traced with a line.
 
 The label will be tracked with a single point. That point will be in the centre of the ball when it's initialised and will be translated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
 
 
 ### Collision detection
 
-One way detect a ball to ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
+#### Naive algorithm
+
+One way detect a ball-ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
 
 ![naive collision](figures/ball_collision1.png)
 
-Unfortunately, this strategy doesn't always work. That is because this strategy doesn't take into consideration the direction of the balls velocity. For example, in the previous picture, if the balls are going in the opposite directions, the balls shouldn't collide because if they do, they are going to be moving towards each other after the collision, which isn't right.
+In theory, this strategy always works, however sometimes it produces unwanted collisions. If the balls are moving very fast something like this
 
 ![collision with velocities](figures/ball_collision2.png)
+
+might occur. In this scenario, the algorithm will detect a collision, and call the collision resolve function. This is a problem because the balls are moving away from each other, so, the balls should not be collided. If they are collided, after the function resolves the collision, the balls will be moving towards each other.
+
+#### A better algorithm
 
 To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
 
@@ -139,13 +167,13 @@ To resolve the collision properly we will take the dot product of the difference
 
 ### Collision resolution
 
-There are 2 types of collisions in the game - _ball to line_ and _ball to ball_ which are somewhat similar. Both types are resolved using Newtonian physics.
+There are 2 types of collisions in the game - _ball-line_ and _ball-ball_ which are somewhat similar. Both types are resolved using Newtonian physics.
 
-#### Ball to line:
+#### ball-line:
 
 When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
-#### Ball to ball:
+#### ball-ball:
 
 If we get the projections of the velocity of the ball onto the vector which goes from the centre of the first circle to the second circle, we see that only one of the components of the velocity will be affected (only _V1_ will be changed on the figure). This is because there is only 1 point of interaction between the balls, meaning any forces will have to go from the centre of mass of a ball, through that point.
 
@@ -253,7 +281,7 @@ Judging from other computer games, the pool game should include these things:
 ## Processing  considerations
 
 * The balls will have a velocity and position vector. The velocity vector will be added to the position vector every second.
-* There will be collision functions for ball to ball collisions and ball to wall collisions.
+* There will be collision functions for ball-ball collisions and ball to wall collisions.
 * The balls will have a function which will generate the ball sprite depending on the position and the movement of the ball.
 * Functions which are responsible for checking that the game rules are not broken.
 
