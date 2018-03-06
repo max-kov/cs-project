@@ -12,6 +12,12 @@ link-citations: yes
 csl: refstyle.csl
 ---
 
+# todo
+* ball circumference line
+* main body -> solid color body
+* "The main body of the ball, is a big circle we put everything else on top. A sphere of a solid color will look like a circle from any angle in a 2-dimensions. That’s why we don’t need to worry about any transformations of the solid sphere component."->"Hence we can just draw the solid body as a solid circle which we draw everything else on top of"
+
+
 # Analysis
 
 ## Introduction
