@@ -12,12 +12,6 @@ link-citations: yes
 csl: refstyle.csl
 ---
 
-# todo
-* ball circumference line
-* main body -> solid color body
-* "The main body of the ball, is a big circle we put everything else on top. A sphere of a solid color will look like a circle from any angle in a 2-dimensions. That’s why we don’t need to worry about any transformations of the solid sphere component."->"Hence we can just draw the solid body as a solid circle which we draw everything else on top of"
-
-
 # Analysis
 
 ## Introduction
@@ -40,19 +34,19 @@ My project will be hosted on GitHub[@githubrepo], so other people can play the g
 
 To better understand the problem I had to solve, I decided to interview one of my sixth form classmates about it:
 
-__What are you having problems at the moment?__
+__What are the problems with the current system?__
 
-_We were supposed to have a pool table installed in the common room this year, but the student union didn't have enough money to do that. Our group has a lot of free time in school, and we really want to play pool against each other, even if it's on a computer_
+_We were supposed to have a pool table installed in the common room this year, but the student union didn't have enough money to do that. Our group has a lot of free time in school, and we really want to play pool against each other, even if it's on a computer._
 
 __Have you found anything online which works as you want?__
 
-_We have found some pool games online, but most of them are player vs AI and require internet connection, which, unfortunately, you can't take for granted. In our case we don't really need to be able to play via the internet, an offline game should be fine_
+_We have found some pool games online, but most of them are player vs AI and require internet connection, which, unfortunately, you can't take for granted. In our case we don't really need to be able to play via the internet, an offline game should be fine._
 
 __Is there anything specific you want in the game?__
 
 _A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to tweak with the game options like cue hit power or the ball size._
 
-The user asked for standard features for this game, except for the sandbox mode. That can be achieved in different ways, like an in-game or a configuration file, which is present in many new games. Other than that request, the user needs mostly reflect ones outlined in *Introduction*.
+The user asked for standard features for this game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games. Other than that request, the user needs mostly reflect ones outlined in *Introduction*.
 
 ## Objectives
 
@@ -60,7 +54,8 @@ The user asked for standard features for this game, except for the sandbox mode.
 * The game should run at more than 30 frames per second
 * Physical interactions in the game should be realistic:
   * The movement of the balls should be affected by friction
-  * The game should detect and resolve ball-ball and ball to table side collisions
+  * The ball collisions should be inelastic
+  * The game should detect and resolve ball-ball and ball-table side collisions
 * Game animations look realistic:
   * The balls should visibly *rotate* when moving
   * The cue should move towards the ball when a player is hitting a ball
@@ -70,8 +65,8 @@ The user asked for standard features for this game, except for the sandbox mode.
 
 ### Language Choice
 At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
-According to the Tiobe Index[@tiobe] and PYPL[@pypl], python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, python is a duck-typed language, which means no explicit type declarations are required. This makes python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development. Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework.
-A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
+According to the Tiobe Index[@tiobe] and PYPL[@pypl], Python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, Python is a duck-typed language, which means no explicit type declarations are required. This makes Python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development. Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework.
+A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, Python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
 
 ### Pool Rules
 To implement the rules of pool I had to go online and read about the game rules[@poolrules], here are the main points:
@@ -84,21 +79,18 @@ To implement the rules of pool I had to go online and read about the game rules[
 * If you pot the 8 ball illegally, you lose the game.
 
 ### Collisions
-There will be 3 types of collision - ball-ball, ball to table side and ball to pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations.
-To understand the maths behind the collisions I will use my knowledge from M1 and M2 modules of my mathematics course and the information I found online[@wiki_elasticcollisions][@gamasutra]. The program will use physical ideas like Newtons laws and conservation of momentum to implement realistic collisions.
+There will be 3 types of collision - ball-ball, ball-table side and ball-pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations. To model ball-ball and ball-table side collisions I will use the inelastic collision formula[@inelasticcollision]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of kinetic energy lost in collision and visa versa.
+
+Ball-pocket collisions are much more straight forward - as soon as such a collision is detected, the ball is removed from the game.
 
 ### Rendering
-Some parts of the balls will (like the white stripe around the balls) be modeled as 3d objects,rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space).
+Some parts of the balls (like the white stripe around the balls) will be modeled as 3d objects, rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space).
 
 ### Cue
 The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
 
 ### Friction
-There are 2 friction types in my program: movement friction and collision friction.
-
-To model movement friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
-
-To model friction on collision, I will use the inelastic collision formula[@collisionfriction]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of energy lost in collision and visa versa.
+To model rolling friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
 
 # Documented design
 
@@ -108,68 +100,65 @@ To model friction on collision, I will use the inelastic collision formula[@coll
 
 The ball can be split in 3 parts which must be rendered separately:
 
-* The line on the circumference
+* The ball stripe
 * The label (circle with the number)
-* The main body
+* The solid color body
 
 ![Initial position of the ball](figures/ball1.png)
 
 ![A possible position of the ball](figures/ball2.png)
 
-The main body of the ball, is a big circle we put everything else on top. A sphere of a solid color will look like a circle from any angle in a 2-dimensions. That's why we don't need to worry about any transformations of the solid sphere component.
+A sphere of a solid color will look like a circle from any angle in 2-dimensions. That's why we don't need to worry about any rotations of the solid sphere component. Hence we can just draw the solid body as a solid circle and draw everything else on top.
 
-The line on the side of the ball is rendered by setting many 3-dimensional around the balls stripe when it is initialised and then translated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and the table, and the angle of rotation is calculated using the formula
+The stripe on the ball will be modeled as an array of 3-dimensional points. When the ball moves the points are rotated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and parallel to the table surface, and the angle of rotation is calculated using the formula
 $$
 \theta=\frac{vt}{r}
 $$
-where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given $\frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we use the formula $S=vt$ to get the aforementioned formula.
+where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given by $\frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we substitute the formula $S=vt$ to get the aforementioned formula.
 
-Transformation matrices are used to transform vectors in a specific way. For example, the matrix
+The rotation matrices are calculated using the Euler–Rodrigues formula. The rotated vector $\vec x$ is calculated according to this formula:
+$$
+\vec x\prime =
+\begin{bmatrix}
+    a^2+b^2-c^2-d^2 & 2(bc-ad) & 2(bd+ac) \\
+    2(bc+ad) & a^2+b^2-c^2-d^2 & 2(cd-ab) \\
+    2(bd-ac) & 2(cd+ab) & a^2+b^2-c^2-d^2
+\end{bmatrix}
+\vec x
+$$
+
+Where $a,b,c,d$ are
 
 $$
+\begin{gather*}
+a = cos(\frac{\phi}{2}) \\
+b = k_{x}sin(\frac{\phi}{2}) \\
+c = k_{y}sin(\frac{\phi}{2}) \\
+d = k_{z}sin(\frac{\phi}{2})
+\end{gather*}
+$$
+
+With $\phi$ being the rotation angle and $\vec k=(k_{x},k_{y},k_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
+
+Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ where $\vec k$ are the points with $z\geq0$
+$$
+a=
 \begin{bmatrix}
-    cos(\theta) & -sin(\theta) \\
-    sin(\theta) & cos(\theta)
+    \vec k_{1} & \vec k_{2} & \vec k_{3} & \dots & \vec k_{n}
 \end{bmatrix}
 $$
 
-Rotates a vector around the origin, by angle $\theta$ counterclockwise. To perform the rotation, the vector must be multiplied by the matrix, using matrix multiplication.
+We will draw lines from $\vec k_1$ to $\vec k_2$, from $\vec k_2$ to $\vec k_3$ and so on for every pair of numbers (a line from $\vec k_{i-1}$ to $\vec k_{i}$ for $i\in[2,n]$). This will trace the points with lines, drawing the stripe on the ball.
 
-$$
-\begin{bmatrix}
-    cos(\theta) & -sin(\theta) \\
-    sin(\theta) & cos(\theta)
-\end{bmatrix}
-\begin{bmatrix}
-    x \\
-    y
-\end{bmatrix}
-$$
-
-The rotation matrix above is a 2d rotation matrix. I will be using 3d rotation matrices for my project. Those are slightly different, because they require an angle along with an axis of rotation. Every frame the rotation matrix is calculated and applied to the line. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Other points are traced with a line.
-
-The label will be tracked with a single point. That point will be in the centre of the ball when it's initialised and will be translated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
+The label will be tracked with a single point. That point will be on the top of the ball when it's initialised and will be rotated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
 
 
 ### Collision detection
-
-#### Naive algorithm
 
 One way detect a ball-ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
 
 ![naive collision](figures/ball_collision1.png)
 
-In theory, this strategy always works, however sometimes it produces unwanted collisions. If the balls are moving very fast something like this
-
-![collision with velocities](figures/ball_collision2.png)
-
-might occur. In this scenario, the algorithm will detect a collision, and call the collision resolve function. This is a problem because the balls are moving away from each other, so, the balls should not be collided. If they are collided, after the function resolves the collision, the balls will be moving towards each other.
-
-#### A better algorithm
-
-To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
-
-![collision with dot product](figures/ball_collision3.png)
 
 ### Collision resolution
 
@@ -187,7 +176,7 @@ If we get the projections of the velocity of the ball onto the vector which goes
 
 The result is that we can use 1-dimensional collision formulas here, even though we have a 2-dimensional collision. We do that by only considering the velocity component which goes through the collision point (_V1_) and leave the other velocity component unchanged (_V2_ on the figure).
 
-The general formula for a 1-dimensional collision is[@collisionfriction]:
+The general formula for a 1-dimensional collision is[@inelasticcollision]:
 $$
 V'_1=\frac{(1+e)M_1}{M_1+M_2}V_2
 $$
@@ -237,7 +226,21 @@ This is the whole game split into functions. Every turn, one player uses the cue
 
 ## User Interface
 
-The game will have a simple main menu which allow the user to exit the game or start the game. In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have ball indicators, which will tell the players which balls they need to pot to win the game.
+ Judging from other computer games, the pool game should include these things:
+
+* The game screen should be big enough to see everything clearly.
+* The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
+* The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
+* The game should have a border so that the cue stick could be used even if the ball is in a corner.
+* The game should have a minimal game menu.
+
+In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have ball indicators, which will tell the players which balls they need to pot to win the game.
+
+### Controls
+
+* The game should be almost fully controlled through the cue stick to hit the balls. The cue will be interactive via the mouse. An exception to the previous rule is if the white ball was potted and it must be moveable. In that case the ball can be interacted with via the mouse, specifically if the game rules allow the ball to be moved the player can click the ball and move it.
+* In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
+* While in game, the user should be able to press the ESC button to close the game.
 
 ### Modular Design
 
@@ -267,27 +270,10 @@ There will also be supplementary classes, which are used by the game_state class
 
 ![graphics](figures/object_diagram_graphics.png)
 
-
-## Design  considerations
-
-Judging from other computer games, the pool game should include these things:
-
-* The game screen should be big enough to see everything clearly.
-* The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
-* The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
-* The game should have a border so that the cue stick could be used even if the ball is in a corner.
-* The game should have a minimal game menu.
-
-## Input  considerations
-
-* The game should be almost fully controlled through the cue stick to hit the balls. The cue will be interactive via the mouse. An exception to the previous rule is if the white ball was potted and it must be moveable. In that case the ball can be interacted with via the mouse, specifically if the game rules allow the ball to be moved the player can click the ball and move it.
-* In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
-* While in game, the user should be able to press the ESC button to close the game.
-
 ## Processing  considerations
 
-* The balls will have a velocity and position vector. The velocity vector will be added to the position vector every second.
-* There will be collision functions for ball-ball collisions and ball to wall collisions.
+* The balls will have a velocity and position vector. The velocity vector will be added to the position vector every iteration.
+* There will be collision functions for ball-ball collisions and ball-table side collisions.
 * The balls will have a function which will generate the ball sprite depending on the position and the movement of the ball.
 * Functions which are responsible for checking that the game rules are not broken.
 
@@ -306,8 +292,19 @@ In the game there is a special case  where there is a need for extra validation.
 
 This^[https://github.com/max-kov/pool/commit/872bdde305882ee68b771a3a03be3ab264d586ca] is a bug regarding the cue. If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
 
+### Collision resolution bug
 
-All of the code is available on github[@githubrepo] with testing results.
+In theory, this strategy always works, however sometimes it produces unwanted collisions. If the balls are moving very fast something like this
+
+![collision with velocities](figures/ball_collision2.png)
+
+might occur. In this scenario, the algorithm will detect a collision, and call the collision resolve function. This is a problem because the balls are moving away from each other, so, the balls should not be collided. If they are collided, after the function resolves the collision, the balls will be moving towards each other.
+
+#### A better algorithm
+
+To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
+
+![collision with dot product](figures/ball_collision3.png)
 
 ## collisions.py
 
