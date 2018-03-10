@@ -2,7 +2,7 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-    html_document:
+  html_document:
         toc: true
         toc_depth: 2
         toc_float: true
@@ -129,14 +129,12 @@ $$
 
 Where $a,b,c,d$ are
 
-$$
 \begin{gather*}
 a = cos(\frac{\phi}{2}) \\
 b = k_{x}sin(\frac{\phi}{2}) \\
 c = k_{y}sin(\frac{\phi}{2}) \\
 d = k_{z}sin(\frac{\phi}{2})
 \end{gather*}
-$$
 
 With $\phi$ being the rotation angle and $\vec k=(k_{x},k_{y},k_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
 
@@ -155,18 +153,39 @@ The label will be tracked with a single point. That point will be on the top of 
 
 ### Collision detection
 
+#### Ball-ball and ball-pocket
+
+Because pockets are modeled as circles, we use the same algorithm to detect collisions for both balls and circles.
+
 One way detect a ball-ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
 
-![naive collision](figures/ball_collision1.png)
+![](figures/ball_collision1.png)
 
+#### Ball-line
+
+![](figures/lineballcollision1.png)
+
+To detect such a collision we need to get the perpendicular distance from the ball to the line.
+
+![](figures/lineballcollision2.png)
+
+We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the _projection point_ (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare the distance to the balls radius to determine if the ball is colliding with the line.
+
+However there is one final caveat:
+
+![](figures/lineballcollision3.png)
+
+it's possible for the projected point to be outside of the line. To check that its not the case, we check that the distance from p1 and p2 to the projected point is less than the length of the line (distance from p1 to p2).
 
 ### Collision resolution
 
-There are 2 types of collisions in the game - _ball-line_ and _ball-ball_ which are somewhat similar. Both types are resolved using Newtonian physics.
+#### ball-pocket
+
+In my game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
 
 #### ball-line:
 
-When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
+This collision is called ball-line, because the table walls are modeled as lines. When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
 #### ball-ball:
 
@@ -201,6 +220,7 @@ The area of the green triangles equals the area of the cue, therefore the click 
 
 ![click outside cue](figures/cue2.png)
 
+The user clicks on the blue dot which is outside the black cue. The sum of the ares of the green triangles is greater than the area of the cue, thus the point is outside of the cue.
 
 ### The main game loop
 
@@ -234,7 +254,15 @@ This is the whole game split into functions. Every turn, one player uses the cue
 * The game should have a border so that the cue stick could be used even if the ball is in a corner.
 * The game should have a minimal game menu.
 
-In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have ball indicators, which will tell the players which balls they need to pot to win the game.
+![main menu model](figures/main_menu.png)
+
+In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have some indicators of the state of the game:
+
+* A "current player" indicator (which can just be a label on the top)
+* An indicator of which balls the players need to pot to win the game
+* An indicator of whether the current player can move the cue ball
+
+![UI example figure](figures/ui_example1.png)
 
 ### Controls
 
@@ -280,31 +308,14 @@ There will also be supplementary classes, which are used by the game_state class
 ![game flow](figures/game_flowchart.png)
 
 ## Input Validation
-In the game there is a special case  where there is a need for extra validation. When the player is allowed to move the ball, we must make sure that the player does not move the ball outside of the game border or into another ball.
 
-![bad ball placement](figures/table.png)
+When a player is allowed change the game state, we must make sure that the player won't abuse anything with these rules:
+
+* When the player is allowed to move the ball, check that the player does not move the ball outside of the game border or into another ball.
+* When the player is using the cue, it must not extend indefinitely (there should be a reasonable limit on the extension).
+* The players should not be allowed to move the white ball out of the white line region on the first hit.
 
 # Technical solution
-
-## Debugging errors during the development of the program
-
-### "Reverse" shot bug
-
-This^[https://github.com/max-kov/pool/commit/872bdde305882ee68b771a3a03be3ab264d586ca] is a bug regarding the cue. If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
-
-### Collision resolution bug
-
-In theory, this strategy always works, however sometimes it produces unwanted collisions. If the balls are moving very fast something like this
-
-![collision with velocities](figures/ball_collision2.png)
-
-might occur. In this scenario, the algorithm will detect a collision, and call the collision resolve function. This is a problem because the balls are moving away from each other, so, the balls should not be collided. If they are collided, after the function resolves the collision, the balls will be moving towards each other.
-
-#### A better algorithm
-
-To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them.
-
-![collision with dot product](figures/ball_collision3.png)
 
 ## collisions.py
 
@@ -368,8 +379,68 @@ cat pool/table_sprites.py
 
 # Testing
 
+## Bugs fixed during the development of the program
+
+### "Reverse" shot bug
+
+If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
+
+Code changed (pool/cue.py line 114)[@reverseshotcommit]:
+
+```
+-        if self.displacement > config.ball_radius:
++        if self.displacement > config.ball_radius+config.cue_safe_displacement:
+```
+
+The new variable `config.cue_safe_displacement` is defined in the configuration file, and defines how far the cue can be displaced, before the ball will be affected. For example, if the user displaces the cue by 10 units, but and `config.cue_safe_displacement` is 15, if the user releases the cue, the ball will be unaffected, and the cue will be returned into its initial position.
+
+### Collision resolution bug
+
+Sometimes, during the play of the game, the balls would sometimes "stick" to each other. Turns out there was a problem with the resolution of the collision, or more precisely, when it was triggered.
+
+The problem is caused by when 2 balls overlap. When the balls collide, there will inevitably will be some overlap, at least because of rounding errors. If the balls are moving quickly, the overlap may be significant.
+
+![](figures/ball_overlap1.png)
+
+![collision with overlap](figures/ball_overlap2.png)
+
+Because the collision is inelastic one of the balls (or both) will lose some kinetic energy, and will therefore will be moving slower than before. If the balls are moving approximately towards each other, both of the balls will be moving slower.
+
+![collision with overlap](figures/ball_overlap3.png)
+
+Because of this loss of velocity, sometimes after colliding and moving once (one frame) they will still be inside each other, and thus the collision detection algorithm will trigger in the next frame again. If collision resolution algorithm is called on balls which are moving in opposite directions, the vectors will be reversed, and on the next frame the balls will be moving __towards__ each other, making the process repeat indefinitely, which in turn makes the balls stick.
+
+![collision with dot product](figures/ball_collision3.png)
+
+To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
+
+__Code changed__:
+
+First addition (in function *collide_balls*)[@ballcollisioncommit]:
+
+```
++def collide_balls(ball1, ball2):
++    point_diff = ball2.pos-ball1.pos
++    system_velocity = ball1.velocity-ball2.velocity
+...
++    if np.dot(point_diff,system_velocity)>0:
+..
+```
+
+Later reworked into:
+
+```
+def ball_collision_check(ball1, ball2):
+    # distance check followed by checking if either of the balls are moving
+    # followed by vector projection check, to see if both are moving towards
+    # each other
+    return distance_less_equal(ball1.pos, ball2.pos, 2 * config.ball_radius) and \
+        np.count_nonzero(np.concatenate((ball1.velocity, ball2.velocity))) > 0 and \
+        np.dot(ball2.pos - ball1.pos, ball1.velocity - ball2.velocity) > 0
+```
+
 ## White box testing (Unit testing)
-In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, and, more specifically, unit testing, because I am testing specific functions of the program (which I wrote myself).
+In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing, because I am testing specific functions of the program.
 To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
 
 ```
