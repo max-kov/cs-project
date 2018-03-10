@@ -138,7 +138,7 @@ d = k_{z}sin(\frac{\phi}{2})
 
 With $\phi$ being the rotation angle and $\vec k=(k_{x},k_{y},k_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
 
-Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the $z$-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ where $\vec k = (x,y,z)$ with $z\geq0$
+Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the $z$-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ with $n$ points $\vec k = (x,y,z)$ on the ball with every $\vec k$ having $z\geq0$
 $$
 a=
 \begin{bmatrix}
