@@ -114,7 +114,7 @@ The stripe on the ball will be modeled as an array of 3-dimensional points. When
 $$
 \theta=\frac{vt}{r}
 $$
-where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given by $\frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we substitute the formula $S=vt$ to get the aforementioned formula.
+where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given by $\theta = \frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we substitute the formula $S=vt$ to get the aforementioned formula.
 
 The rotation matrices are calculated using the Euler–Rodrigues formula. The rotated vector $\vec x$ is calculated according to this formula:
 $$
@@ -138,7 +138,7 @@ d = k_{z}sin(\frac{\phi}{2})
 
 With $\phi$ being the rotation angle and $\vec k=(k_{x},k_{y},k_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
 
-Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the z-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ where $\vec k$ are the points with $z\geq0$
+Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the $z$-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ where $\vec k = (x,y,z)$ with $z\geq0$
 $$
 a=
 \begin{bmatrix}
@@ -155,7 +155,7 @@ The label will be tracked with a single point. That point will be on the top of 
 
 #### Ball-ball and ball-pocket
 
-Because pockets are modeled as circles, we use the same algorithm to detect collisions for both balls and circles.
+Because pockets are modeled as circles, we use the same algorithm to detect collisions for both balls and pockets.
 
 One way detect a ball-ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
 
@@ -181,7 +181,7 @@ it's possible for the projected point to be outside of the line. To check that i
 
 #### ball-pocket
 
-In my game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
+In the game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
 
 #### ball-line:
 
@@ -210,9 +210,9 @@ $$
 V'_1=\frac{(1+e)}{2}V_{a2}+V_{b1}
 $$
 
-### Cue stick click detection
+### Cue click detection
 
-Because the cue stick is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
+Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
 
 ![click inside cue](figures/cue1.png)
 
@@ -244,6 +244,8 @@ While not_closed:
 
 This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do *one frame*, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
 
+![game flow](figures/game_flowchart.png)
+
 ## User Interface
 
  Judging from other computer games, the pool game should include these things:
@@ -251,7 +253,7 @@ This is the whole game split into functions. Every turn, one player uses the cue
 * The game screen should be big enough to see everything clearly.
 * The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
 * The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
-* The game should have a border so that the cue stick could be used even if the ball is in a corner.
+* The game should have a border so that the cue could be used even if the ball is in a corner.
 * The game should have a minimal game menu.
 
 ![main menu model](figures/main_menu.png)
@@ -266,9 +268,9 @@ In-game interface will consist of the cue, which can be aimed and retracted back
 
 ### Controls
 
-* The game should be almost fully controlled through the cue stick to hit the balls. The cue will be interactive via the mouse. An exception to the previous rule is if the white ball was potted and it must be moveable. In that case the ball can be interacted with via the mouse, specifically if the game rules allow the ball to be moved the player can click the ball and move it.
+* The game should be almost fully controlled through the cue to hit the balls. The cue will be interactive via the mouse. An exception to the previous rule is if the white ball was potted and it must be moveable. In that case the ball can be interacted with via the mouse, specifically if the game rules allow the ball to be moved the player can click the ball and move it.
 * In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
-* While in game, the user should be able to press the ESC button to close the game.
+* While in game, the user should be able to press the ESC button to leave to the main menu.
 
 ### Modular Design
 
@@ -305,8 +307,6 @@ There will also be supplementary classes, which are used by the game_state class
 * The balls will have a function which will generate the ball sprite depending on the position and the movement of the ball.
 * Functions which are responsible for checking that the game rules are not broken.
 
-![game flow](figures/game_flowchart.png)
-
 ## Input Validation
 
 When a player is allowed change the game state, we must make sure that the player won't abuse anything with these rules:
@@ -316,6 +316,24 @@ When a player is allowed change the game state, we must make sure that the playe
 * The players should not be allowed to move the white ball out of the white line region on the first hit.
 
 # Technical solution
+
+## main.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/main.py
+```
+
+## gamestate.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/gamestate.py
+```
+
+## physics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/physics.py
+```
 
 ## collisions.py
 
@@ -329,28 +347,10 @@ cat pool/collisions.py
 cat pool/ball.py
 ```
 
-## config.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/config.py
-```
-
 ## cue.py
 
 ```{r engine='bash', comment='', echo=F}
 cat pool/cue.py
-```
-
-## event.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/event.py
-```
-
-## gamestate.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/gamestate.py
 ```
 
 ## graphics.py
@@ -359,22 +359,22 @@ cat pool/gamestate.py
 cat pool/graphics.py
 ```
 
-## main.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/main.py
-```
-
-## physics.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/physics.py
-```
-
 ## table_sprites.py
 
 ```{r engine='bash', comment='', echo=F}
 cat pool/table_sprites.py
+```
+
+## event.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/event.py
+```
+
+## config.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/config.py
 ```
 
 # Testing
@@ -383,7 +383,7 @@ cat pool/table_sprites.py
 
 ### "Reverse" shot bug
 
-If the cue is brought very close to the white ball, the game might think that the cue stick is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
+If the cue is brought very close to the white ball, the game might think that the cue is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
 
 Code changed (pool/cue.py line 114)[@reverseshotcommit]:
 
@@ -447,6 +447,7 @@ To make the job of testing the game with every change easier, I have made unit t
 def test_point_distance1(self):
     assert physics.point_distance(np.array([0, 0]), np.array([3, 4])) == 5
 ```
+
 This function tests the function responsible for calculating the distance between two points. The function uses the function to calculate the distance between points (0,0) and (3,4), and compares it to 5. If the function does not return 5, the test returns an exception.
 Here is another, more complicated example of an edge case test:
 
