@@ -2,11 +2,9 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-  html_document:
+  pdf_document:
         toc: true
         toc_depth: 2
-        toc_float: true
-        theme: paper
 bibliography: references.bib
 link-citations: yes
 csl: refstyle.csl
@@ -27,10 +25,9 @@ Therefore, this project will deal with 3d rendering, physical simulation and gam
 
 ## Identification of End Users
 
-The main end users of this project are my school friends who are interested in playing a computer version of pool.
-My project will be hosted on GitHub[@githubrepo], so other people can play the game for free.
+The main end users of this project are my school friends who are interested in playing a computer version of pool. The code will include the physical formulas of collisions and friction, and because this project will open-source, this game might help other people to understand how 2-dimensional ball physics work.
 
-## Evidence of analysis
+## Evidence of Analysis
 
 To better understand the problem I had to solve, I decided to interview one of my sixth form classmates about it:
 
@@ -84,7 +81,68 @@ There will be 3 types of collision - ball-ball, ball-table side and ball-pocket.
 Ball-pocket collisions are much more straight forward - as soon as such a collision is detected, the ball is removed from the game.
 
 ### Rendering
-Some parts of the balls (like the white stripe around the balls) will be modeled as 3d objects, rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space).
+Some parts of the balls (like the white stripe around the balls) will be modeled as 3d objects, rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space). Matrices are rectangular arrays which enable us to do spacial transformations of objects. Here is an example of a matrix:
+
+$$
+\begin{bmatrix}
+    1 & 2 & 0 \\
+    2 & 8 & 2 \\
+\end{bmatrix}
+$$
+
+Matrices are very useful when you want to manipulate vectors in space. For example, this matrix:
+
+$$
+\begin{bmatrix}
+    cos(\theta) & -sin(\theta) \\
+    sin(\theta) & cos(\theta) \\
+\end{bmatrix}
+$$
+
+rotates points about the origin through an angle $\theta$ counterclockwise. To rotate a vector by the matrix, you must do matrix multiplication. If you have 2 matrices $A$ and $B$, the matrix multiple $C$ is defined like this:
+
+$$
+A=
+\begin{bmatrix}
+    a_{11}&a_{12}&\cdots &a_{1m}\\
+    a_{21}&a_{22}&\cdots &a_{2m}\\
+    \vdots &\vdots &\ddots &\vdots \\
+    a_{n1}&a_{n2}&\cdots &a_{nm}\\
+\end{bmatrix}
+,B=
+\begin{bmatrix}
+    b_{11}&b_{12}&\cdots &b_{1p}\\
+    b_{21}&b_{22}&\cdots &b_{2p}\\
+    \vdots &\vdots &\ddots &\vdots \\
+    b_{m1}&b_{m2}&\cdots &b_{mp}\\
+\end{bmatrix}
+$$
+$$
+AB=
+\begin{bmatrix}
+    c_{11}&c_{12}&\cdots &c_{1p}\\
+    c_{21}&c_{22}&\cdots &c_{2p}\\
+    \vdots &\vdots &\ddots &\vdots \\
+    c_{n1}&c_{n2}&\cdots &c_{np}\\
+\end{bmatrix}
+$$
+Or
+$$
+ab_{ij}=a_{i1}b_{1j}+\cdots +a_{im}b_{mj}=\sum_{k=1}^{m}a_{ik}b_{kj}
+$$
+So, for example, if you have a point in 2-dimensional space $\vec k=(1,2)$ which you want to rotate 90 degrees counterclockwise, you compute:
+
+$$
+\begin{bmatrix}
+    1 \\
+    2 \\
+\end{bmatrix}
+\begin{bmatrix}
+    cos(90) & -sin(90) \\
+    sin(90) & cos(90) \\
+\end{bmatrix}
+$$
+
 
 ### Cue
 The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
@@ -92,7 +150,7 @@ The cue will be modeled as rectangle, which the player can click and draw to per
 ### Friction
 To model rolling friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
 
-# Documented design
+# Documented Design
 
 ## Algorithms
 
@@ -110,66 +168,77 @@ The ball can be split in 3 parts which must be rendered separately:
 
 A sphere of a solid color will look like a circle from any angle in 2-dimensions. That's why we don't need to worry about any rotations of the solid sphere component. Hence we can just draw the solid body as a solid circle and draw everything else on top.
 
-The stripe on the ball will be modeled as an array of 3-dimensional points. When the ball moves the points are rotated using rotation matrices. The 3d matrix is calculated from an axis and an angle. We know the axis of rotation - it is the line perpendicular to the velocity vector and parallel to the table surface, and the angle of rotation is calculated using the formula
+The stripe on the ball will be modeled as an array of 3-dimensional vectors ($\vec k = (x,y,z)$). The line array $a$ is defined as
+
+$$
+a=
+\begin{bmatrix}
+    \vec k_{1}, & \vec k_{2}, & \vec k_{3}, & \dots, & \vec k_{n}
+\end{bmatrix}
+$$
+
+Where $\vec k_n$ is a 3d vector on the surface of the ball. We will draw lines from $\vec k_1$ to $\vec k_2$, from $\vec k_2$ to $\vec k_3$ and so on for every adjacent pair of points (a line from $\vec k_{i-1}$ to $\vec k_{i}$ for $i\in[2,n]$). This will draw a polygon that very closely follows the shape of the stripe.
+
+When the ball moves the line array is rotated using rotation matrices. A 3d rotation matrix can be calculated from a rotation axis and an angle through which the ball needs to be rotated. We know the axis of rotation - it is the line perpendicular to the velocity vector and parallel to the table surface, and the angle of rotation is calculated using the formula
 $$
 \theta=\frac{vt}{r}
 $$
-where $v$ is the linear speed of the ball and $r$ is the radius of the circle with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given by $\theta = \frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we substitute the formula $S=vt$ to get the aforementioned formula.
+where $v$ is the linear speed of the ball and $r$ is the radius of the ball with $\theta$ being in radians. The intuition for the formula is that when the ball is moving, every point on the circumference must touch the ground before it does a full rotation, therefore it must move $2\pi r$ units for a full rotation. The angle the ball has rotated is therefore given by $\theta = \frac{S}{r}$, where $S$ is the linear distance the ball has traveled. Then we substitute the formula $S=vt$ to get the aforementioned formula.
 
-The rotation matrices are calculated using the Euler–Rodrigues formula. The rotated vector $\vec x$ is calculated according to this formula:
+The rotation matrices are calculated using the Euler–Rodrigues formula. The rotated vector $\vec k\prime$ is calculated according to this formula:
 $$
-\vec x\prime =
+\vec k\prime =
 \begin{bmatrix}
     a^2+b^2-c^2-d^2 & 2(bc-ad) & 2(bd+ac) \\
     2(bc+ad) & a^2+b^2-c^2-d^2 & 2(cd-ab) \\
     2(bd-ac) & 2(cd+ab) & a^2+b^2-c^2-d^2
 \end{bmatrix}
-\vec x
+\vec k
 $$
 
 Where $a,b,c,d$ are
 
 \begin{gather*}
 a = cos(\frac{\phi}{2}) \\
-b = k_{x}sin(\frac{\phi}{2}) \\
-c = k_{y}sin(\frac{\phi}{2}) \\
-d = k_{z}sin(\frac{\phi}{2})
+b = v_{x}sin(\frac{\phi}{2}) \\
+c = v_{y}sin(\frac{\phi}{2}) \\
+d = v_{z}sin(\frac{\phi}{2})
 \end{gather*}
 
-With $\phi$ being the rotation angle and $\vec k=(k_{x},k_{y},k_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
+With $\phi$ being the rotation angle and $\vec v=(v_{x},v_{y},v_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
 
-Every frame the rotation matrix is calculated and applied to every point in the line array. When the line is drawn, if the $z$-axis value of a point is less than $0$, the point is ignored. That is because that point is *under* the ball, and cannot be seen from a top-down view. Then, we have matrix $a$ with $n$ points $\vec k = (x,y,z)$ on the ball with every $\vec k$ having $z\geq0$
-$$
-a=
-\begin{bmatrix}
-    \vec k_{1} & \vec k_{2} & \vec k_{3} & \dots & \vec k_{n}
-\end{bmatrix}
-$$
+Every frame the rotation matrix is calculated and applied to every vector in the line array. When the line is drawn, if the $z$-axis value of a vector is less than $0$, the point is ignored. That is because the centre of the ball is always at $z=0$ so anything below that is *under* the ball, and cannot be seen from a top-down view. So, before drawing the line array we filter out the every with $\vec k$ having $z\geq0$.
 
-We will draw lines from $\vec k_1$ to $\vec k_2$, from $\vec k_2$ to $\vec k_3$ and so on for every pair of numbers (a line from $\vec k_{i-1}$ to $\vec k_{i}$ for $i\in[2,n]$). This will trace the points with lines, drawing the stripe on the ball.
+The label will be tracked with a single point. That point will be on the top of the ball when it's initialised and will be rotated with the same rotation matrix outlined earlier. Additionally, the label will be scaled depending on the orientation of the ball. For example, when the label is facing to the side, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a heuristic method. This technique produces realistic results, but isn't how it exactly works in real life. One method which would produce better results is surfel modeling[@surfel], but implementing something that complex is out of the scope of this project.
 
-The label will be tracked with a single point. That point will be on the top of the ball when it's initialised and will be rotated with the same rotation matrix outlined earlier. Additionally, the label will be compressed or *squashed* depending on its position on the circle. For example, when the label is on the circumference of the ball, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a __heuristic__ method. This technique produces believable results, but isn't how it exactly works in real life. One method which would produce better results is __surfel__ modeling[@surfel], but implementing something that complex is out of the scope of this project.
+### Object Movement
 
+Most objects which appear in the game will have a velocity vector and a position vector. Every frame the computer will erase the old object and redraw it on its new position to simulate movement. For example, to simulate ball movement the computer will draw a circle of the background color on top of the old rendition of the ball (thus erasing it), add the velocity vector to the position vector of the ball and then draw a new rendering on its updated position.
 
-### Collision detection
+If the objects don't move too fast and the game is running at moderate frames-per-second, the movement will look smooth.
 
-#### Ball-ball and ball-pocket
+### Collision Detection
 
-Because pockets are modeled as circles, we use the same algorithm to detect collisions for both balls and pockets.
+#### Ball-Ball
 
-One way detect a ball-ball collision is to check the distances between every ball every frame and, if the distance between two balls is less than the sum of their radii, that means that they have collided.
+One way detect a ball-ball collision is to check the distances between ball centres every frame and, if that distance is less than the sum of their radii, that means that they have collided.
 
 ![](figures/ball_collision1.png)
 
-#### Ball-line
+#### Ball-Pocket
+
+In the game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
+Because pockets are modeled as spheres, we use the same algorithm to detect collisions for both balls and pockets.
+
+#### Ball-Line
+
+This collision is called ball-line, because the table walls are modeled as lines. To detect such a collision we need to get the perpendicular distance from the centre of the ball to the line.
 
 ![](figures/lineballcollision1.png)
 
-To detect such a collision we need to get the perpendicular distance from the ball to the line.
-
 ![](figures/lineballcollision2.png)
 
-We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the _projection point_ (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare the distance to the balls radius to determine if the ball is colliding with the line.
+We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the _projection point_ (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare that distance to the balls radius to determine if the ball is colliding with the line.
 
 However there is one final caveat:
 
@@ -179,26 +248,22 @@ it's possible for the projected point to be outside of the line. To check that i
 
 ### Collision resolution
 
-#### ball-pocket
+#### Ball-Line
 
-In the game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
+ As mentioned in Analysis, when a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
 
-#### ball-line:
+#### Ball-Ball
 
-This collision is called ball-line, because the table walls are modeled as lines. When a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
-
-#### ball-ball:
-
-If we get the projections of the velocity of the ball onto the vector which goes from the centre of the first circle to the second circle, we see that only one of the components of the velocity will be affected (only _V1_ will be changed on the figure). This is because there is only 1 point of interaction between the balls, meaning any forces will have to go from the centre of mass of a ball, through that point.
+To resolve a ball-ball collision we need to split the velocities of both balls into 2 perpendicular components. One component is parallel to the vector connecting the centres of the balls and the other one perpendicular to the first component.
 
 ![ball collision example](figures/ball_friction1.png)
 
-The result is that we can use 1-dimensional collision formulas here, even though we have a 2-dimensional collision. We do that by only considering the velocity component which goes through the collision point (_V1_) and leave the other velocity component unchanged (_V2_ on the figure).
+Just as with the ball-line collision scenario, the component perpendicular to the vector connecting the centres of the balls stays unchanged after the collision while the parallel component needs to be calculated using the inelastic collision formula[@inelasticcollision]:
 
-The general formula for a 1-dimensional collision is[@inelasticcollision]:
 $$
 V'_1=\frac{(1+e)M_1}{M_1+M_2}V_2
 $$
+
 Where $e$ is the coefficient of restitution (explained in analysis), $M_1$ and $M_2$ are the masses of the first and second balls, respectively. $V'_1$ is the velocity of the first ball after the collision and $V_2$ is the velocity of the second ball prior to the collision.
 
 In our case, the masses of the balls are all the same, which gives us:
@@ -210,7 +275,7 @@ $$
 V'_1=\frac{(1+e)}{2}V_{a2}+V_{b1}
 $$
 
-### Cue click detection
+### Cue Click Detection
 
 Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
 
@@ -220,41 +285,36 @@ The area of the green triangles equals the area of the cue, therefore the click 
 
 ![click outside cue](figures/cue2.png)
 
-The user clicks on the blue dot which is outside the black cue. The sum of the ares of the green triangles is greater than the area of the cue, thus the point is outside of the cue.
+The user clicks on the blue dot which is outside the black cue. The sum of the areas of the green triangles is greater than the area of the cue, thus the point is outside of the cue.
 
 ### The main game loop
 
 Pseudocode:
+
 ```
-While not_closed:
-    button_pressed_in_main_menu = main_menu_get_button()
+while True:
+    while not game_is_over():
+        resolve_collisions()
+        move_everything()
+        redraw_everything()
 
-    if button_pressed_in_main_menu == "Play_button":
-        While not_closed or game_is_over():
-            resolve_collisions()
-            do_one_frame()
-
-            If all_balls_not_moving():
-                check_pool_rules()
-                use_cue()
-
-    if button_pressed_in_main_menu == "Exit_button":
-        not_closed=False
+        if all_balls_stopped():
+            apply_pool_rules()
+            wait_for_cue_hit()
 ```
 
-This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do *one frame*, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
+This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do one frame, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
 
 ![game flow](figures/game_flowchart.png)
 
 ## User Interface
 
- Judging from other computer games, the pool game should include these things:
+A good pool game should implement the following features:
 
 * The game screen should be big enough to see everything clearly.
 * The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
 * The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
-* The game should have a border so that the cue could be used even if the ball is in a corner.
-* The game should have a minimal game menu.
+* The game should have a minimal game menu with a button to start the game and leave the game.
 
 ![main menu model](figures/main_menu.png)
 
@@ -268,7 +328,7 @@ In-game interface will consist of the cue, which can be aimed and retracted back
 
 ### Controls
 
-* The game should be almost fully controlled through the cue to hit the balls. The cue will be interactive via the mouse. An exception to the previous rule is if the white ball was potted and it must be moveable. In that case the ball can be interacted with via the mouse, specifically if the game rules allow the ball to be moved the player can click the ball and move it.
+* The user will use the mouse to move the cue or the cue ball (if it is movable).
 * In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
 * While in game, the user should be able to press the ESC button to leave to the main menu.
 
@@ -280,13 +340,23 @@ In-game interface will consist of the cue, which can be aimed and retracted back
     * Game over
   * Quit the game
 
-## Game objects and classes
+### Development considerations
 
-The game will be split into objects. There will be a main *game_state* class, which contains properties and methods which are related to the state of the game.
+#### Version Control
+
+To be more productive and avoid code loss situations, I will use version control, specifically git, which is the most popular version control framework [@versioncontrol]. Storing a git repository exclusively on a local machine is dangerous since in case of a disk failure all data is lost. To ensure this never occurs, I will regularly upload my code to GitHub, which is a cloud service which allows storing git repositories on their server.
+
+#### Additional Libraries and Library Management
+
+For complex mathematical operations (mostly matrix operations in this project), I used Numpy, a numerical library for python which in addition to a wide range of scalar functions provides a multitude of vector functions.
+
+For managing dependencies I chose pip (all project requirements are specified in requirements.txt), which is a common dependency manager used for python.
+
+## Game Objects and Classes
+
+Most game objects, like balls and cue, will be encapsulated into separate classes with  for the ease of testing and maintaining.
 
 ![game_state](figures/object_diagram_gamestate.png)
-
-Every object game object will have its own class.
 
 ![cue](figures/object_diagram_cue.png)
 
@@ -294,18 +364,9 @@ Every object game object will have its own class.
 
 ![table sprites](figures/object_diagram_tablesprites.png)
 
-There will also be supplementary classes, which are used by the game_state class.
-
 ![events](figures/object_diagram_event.png)
 
 ![graphics](figures/object_diagram_graphics.png)
-
-## Processing  considerations
-
-* The balls will have a velocity and position vector. The velocity vector will be added to the position vector every iteration.
-* There will be collision functions for ball-ball collisions and ball-table side collisions.
-* The balls will have a function which will generate the ball sprite depending on the position and the movement of the ball.
-* Functions which are responsible for checking that the game rules are not broken.
 
 ## Input Validation
 
@@ -377,11 +438,12 @@ cat pool/event.py
 cat pool/config.py
 ```
 
+
 # Testing
 
-## Bugs fixed during the development of the program
+## Bugs Fixed During the Development of the Program
 
-### "Reverse" shot bug
+### "Reverse" Shot Bug
 
 If the cue is brought very close to the white ball, the game might think that the cue is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
 
@@ -394,7 +456,7 @@ Code changed (pool/cue.py line 114)[@reverseshotcommit]:
 
 The new variable `config.cue_safe_displacement` is defined in the configuration file, and defines how far the cue can be displaced, before the ball will be affected. For example, if the user displaces the cue by 10 units, but and `config.cue_safe_displacement` is 15, if the user releases the cue, the ball will be unaffected, and the cue will be returned into its initial position.
 
-### Collision resolution bug
+### Collision Resolution Bug
 
 Sometimes, during the play of the game, the balls would sometimes "stick" to each other. Turns out there was a problem with the resolution of the collision, or more precisely, when it was triggered.
 
@@ -412,7 +474,7 @@ Because of this loss of velocity, sometimes after colliding and moving once (one
 
 ![collision with dot product](figures/ball_collision3.png)
 
-To resolve the collision properly we will take the dot product of the difference between the position vectors of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
+To resolve the collision properly we will take the dot product of the difference between the centres of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
 
 __Code changed__:
 
@@ -439,7 +501,7 @@ def ball_collision_check(ball1, ball2):
         np.dot(ball2.pos - ball1.pos, ball1.velocity - ball2.velocity) > 0
 ```
 
-## White box testing (Unit testing)
+## White Box Testing (Unit Testing)
 In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing, because I am testing specific functions of the program.
 To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
 
@@ -477,7 +539,9 @@ The values in the test are exaggerated so that we know that the game can handle 
 
 ![test2](figures/test2.png)
 
-### To run the tests
+For executing tests I used PyTest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service. 
+
+### How To Run the Tests
 
 The file contains many tests, including matrix transformation tests, line to ball collision tests and the triangle area test. Here is the file itself:
 
