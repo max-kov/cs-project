@@ -2,7 +2,7 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-  pdf_document:
+  html_document:
         toc: true
         toc_depth: 2
 bibliography: references.bib
@@ -14,18 +14,27 @@ csl: refstyle.csl
 
 ## Introduction
 
-This project is about making a 8 ball pool game with a top down view. The game will:
-
-* be played by 2 people on a single computer
-* use the standard pool rule set
-* have ball animations (should visibly rotate)
-* have realistic physical interactions (ball collisions and friction)
-
-Therefore, this project will deal with 3d rendering, physical simulation and game development areas of computer science.
+ Even though the video game industry didn't exist 4 decades ago, it is now one of the most popular hobbies of youth nowadays. With new variations on the original idea like mobile games and virtual reality games, it is likely that these games are here to stay for a long time. This project is about making a 8 ball pool game with a top down view that can be played by 2 players on the same computer.
 
 ## Identification of End Users
 
-The main end users of this project are my school friends who are interested in playing a computer version of pool. The code will include the physical formulas of collisions and friction, and because this project will open-source, this game might help other people to understand how 2-dimensional ball physics work.
+The main end users of this project are my school friends who are interested in playing a computer version of pool. The code will include the physical formulas of collisions and friction, and because this project will open-source and available online, this game might help other people to understand how 2-dimensional ball physics work.
+
+## Available Alternatives
+
+Most pool games online are hosted on online game websites like www.miniclip.com. These games don't provide the source code for their game which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
+
+I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  we're abandoned, or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them. 
+
+There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page of the projects, some users are having problems installing the software[@githubissue].
+
+![](figures/installation_problems.png)
+
+Additionally, looking at commit messages, you can see that the main maintainer was trying to add advertisements to the game, which is a bad idea for this project, because ads will make the user experience worse[@githubads].
+
+![](figures/ads.png)
+
+To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should have an instruction of how to install the game, so that users could acquire the game easily. Also, a 
 
 ## Evidence of Analysis
 
@@ -45,43 +54,16 @@ _A normal pool game with rules for 2 players should suffice. It shouldn't be too
 
 The user asked for standard features for this game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games. Other than that request, the user needs mostly reflect ones outlined in *Introduction*.
 
-## Objectives
-
-* The rules of pool should be implemented in the game
-* The game should run at more than 30 frames per second
-* Physical interactions in the game should be realistic:
-  * The movement of the balls should be affected by friction
-  * The ball collisions should be inelastic
-  * The game should detect and resolve ball-ball and ball-table side collisions
-* Game animations look realistic:
-  * The balls should visibly *rotate* when moving
-  * The cue should move towards the ball when a player is hitting a ball
-* A configuration file, which can change some of the in-game options like ball size or cue hit power
-
 ## Proposed Solution
 
-### Language Choice
-At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
-According to the Tiobe Index[@tiobe] and PYPL[@pypl], Python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, Python is a duck-typed language, which means no explicit type declarations are required. This makes Python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development. Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework.
-A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, Python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
-
-### Pool Rules
-To implement the rules of pool I had to go online and read about the game rules[@poolrules], here are the main points:
-
-* The first break should be performed behind the white line on the table, and the ball may be placed anywhere behind that line.
-* If the players haven't decided which group of balls they are on, and the player pots a ball or several balls of a particular group, that player now is on that group.
-* To win the game, you must pot the 8 ball legally.
-* You must first sink every ball from the group you are on, to pot the 8 ball.
-* Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit *from his hand* (which means that he is allowed to put the white ball anywhere on the table)
-* If you pot the 8 ball illegally, you lose the game.
+This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
 
 ### Collisions
-There will be 3 types of collision - ball-ball, ball-table side and ball-pocket. Every frame the game will check for these collisions, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations. To model ball-ball and ball-table side collisions I will use the inelastic collision formula[@inelasticcollision]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of kinetic energy lost in collision and visa versa.
 
-Ball-pocket collisions are much more straight forward - as soon as such a collision is detected, the ball is removed from the game.
+To simulate ball collisions, every frame the game will check for these collisions by comparing the distances between ball centres, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations. To model ball-ball and ball-table side collisions I can use the inelastic collision formula[@inelasticcollision]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of kinetic energy lost in collision and visa versa.
 
 ### Rendering
-Some parts of the balls (like the white stripe around the balls) will be modeled as 3d objects, rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space). Matrices are rectangular arrays which enable us to do spacial transformations of objects. Here is an example of a matrix:
+Some parts of the balls (like the white stripe around the balls) can be modeled as 3d objects and rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space). Matrices are rectangular arrays which enable us to do spacial transformations of objects. Here is an example of a matrix:
 
 $$
 \begin{bmatrix}
@@ -134,23 +116,91 @@ So, for example, if you have a point in 2-dimensional space $\vec k=(1,2)$ which
 
 $$
 \begin{bmatrix}
-    1 \\
-    2 \\
-\end{bmatrix}
-\begin{bmatrix}
     cos(90) & -sin(90) \\
     sin(90) & cos(90) \\
 \end{bmatrix}
+\begin{bmatrix}
+    1 \\
+    2 \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    -2 \\
+    1 \\
+\end{bmatrix}
 $$
 
+You can see the rotation represented on a 2d plane on the next figure.
 
-### Cue
-The cue will be modeled as rectangle, which the player can click and draw to perform a hit. The power of the hit will be proportional to the displacement of the cue from the ball.
+![](figures/rotation.png)
 
 ### Friction
-To model rolling friction I will use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
+To model rolling friction I can use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
+
+### Language Choice
+At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
+
+The programming language of my choice should be able to deal with matrix manipulations outlined earlier. Both languages support array data structures, however, Python has a numerical computations library - Numpy[@numpy]. This library has implemented functions for matrix operations, like matrix multiplication and more.
+
+According to the Tiobe Index[@tiobe] and PYPL[@pypl], Python is significantly more popular than Pascal and hence is a better language to use due to more resources available online (e.g. more StackOverlow questions/answers). This also suggests that python will have higher quality/variety of libraries due to a larger community. Additionally, Python is a duck-typed language, which means no explicit type declarations are required. This makes Python less verbose and more flexible, allowing for faster development, which is beneficial given a limited amount of time for development.
+
+Finally, a game development library will be at the core of my project so it is important to pick a language with a mature, well maintained game development framework. A number of resources list the most popular libraries used for implementing games in Pascal[@fpcgameengine][@delphigamedev]. All of these libraries are either missing completely (home page is broken), seriously outdated or are very immature. At the same time, Python has Pygame[@pygamegithub] which is open source, actively maintained (at the time of writing last commit 3 days ago) and mature (3k commits with 40 contributors).
+
+## Objectives
+
+* The rules of pool should be implemented in the game
+* The game should run at more than 30 frames per second
+* Physical interactions in the game should be realistic:
+  * The movement of the balls should be affected by friction
+  * The ball collisions should be inelastic
+  * The game should detect and resolve ball-ball and ball-table side collisions
+* Game animations look realistic:
+  * The balls should visibly *rotate* when moving
+  * The cue should move towards the ball when a player is hitting a ball
+* A configuration file, which can change some of the in-game options like ball size or cue hit power
+* An installation guide/README file for users
+
+## Acceptable Limitations
+
+After researching the multiplayer feature, I think it will be unfeasible for me to implement it alone. Implementing multiplayer will require good theoretical knowledge of networking and sockets, but the main problem is that adding multiplayer will add a lot of validation problems between clients, this would require a server, which I don't have.
+
 
 # Documented Design
+
+## User Interface
+
+A good pool game should implement the following features:
+
+* The game screen should be big enough to see everything clearly.
+* The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
+* The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
+* The game should have a minimal game menu with a button to start the game and leave the game.
+
+![main menu model](figures/main_menu.png)
+
+In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have some indicators of the state of the game:
+
+* A "current player" indicator (which can just be a label on the top)
+* An indicator of which balls the players need to pot to win the game
+* An indicator of whether the current player can move the cue ball
+
+![UI example figure](figures/ui_example1.png)
+
+### Controls
+
+* The user will use the mouse to move the cue or the cue ball (if it is movable).
+* In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
+* While in game, the user should be able to press the ESC button to leave to the main menu.
+
+### Pool Rules
+To implement the rules of pool I went online and read about the game rules[@poolrules], here are the main points:
+
+* The first break should be performed behind the white line on the table, and the ball may be placed anywhere behind that line.
+* If the players haven't decided which group of balls they are on, and the player pots a ball or several balls of a particular group, that player now is on that group.
+* To win the game, you must pot the 8 ball legally.
+* You must first sink every ball from the group you are on, to pot the 8 ball.
+* Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit *from his hand* (which means that he is allowed to put the white ball anywhere on the table)
+* If you pot the 8 ball illegally, you lose the game.
 
 ## Algorithms
 
@@ -240,7 +290,7 @@ This collision is called ball-line, because the table walls are modeled as lines
 
 We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the _projection point_ (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare that distance to the balls radius to determine if the ball is colliding with the line.
 
-However there is one final caveat:
+However, there is one final caveat:
 
 ![](figures/lineballcollision3.png)
 
@@ -307,30 +357,7 @@ This is the whole game split into functions. Every turn, one player uses the cue
 
 ![game flow](figures/game_flowchart.png)
 
-## User Interface
 
-A good pool game should implement the following features:
-
-* The game screen should be big enough to see everything clearly.
-* The balls should look realistic, and have easily distinguishable stripes on them so the players would not be confused which balls they need to pot.
-* The game should have aiming lines to help the player aim. These lines are needed because in real life the player can line up the ball and see where it will go, so the game should have similar functionality.
-* The game should have a minimal game menu with a button to start the game and leave the game.
-
-![main menu model](figures/main_menu.png)
-
-In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have some indicators of the state of the game:
-
-* A "current player" indicator (which can just be a label on the top)
-* An indicator of which balls the players need to pot to win the game
-* An indicator of whether the current player can move the cue ball
-
-![UI example figure](figures/ui_example1.png)
-
-### Controls
-
-* The user will use the mouse to move the cue or the cue ball (if it is movable).
-* In the menu the main input method is the mouse, however the user should be able to quit the game by pressing ESC key.
-* While in game, the user should be able to press the ESC button to leave to the main menu.
 
 ### Modular Design
 
