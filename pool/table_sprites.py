@@ -15,7 +15,8 @@ class Hole(pygame.sprite.Sprite):
         self.image.set_colorkey((200, 200, 200))
 
         pygame.draw.circle(self.image, (0, 0, 0),
-                           (config.hole_radius, config.hole_radius), config.hole_radius, 0)
+                           (config.hole_radius, config.hole_radius),
+                           config.hole_radius, 0)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.pos = np.array([x, y])
@@ -51,8 +52,11 @@ class TableColoring(pygame.sprite.Sprite):
         self.rect.topleft = (0, 0)
         self.font = config.get_default_font(config.ball_radius)
         # generates text at the bottom of the table
-        self.target_ball_text = [self.font.render(config.player1_target_text, False, config.player1_cue_color),
-                                 self.font.render(config.player2_target_text, False, config.player2_cue_color)]
+        self.target_ball_text = [
+            self.font.render(config.player1_target_text, False,
+                             config.player1_cue_color),
+            self.font.render(config.player2_target_text, False,
+                             config.player2_cue_color)]
 
     def redraw(self):
         self.image.fill(config.table_side_color)
@@ -69,11 +73,15 @@ class TableColoring(pygame.sprite.Sprite):
         # draws the target balls for each players
         if game_state.ball_assignment is not None:
             start_x = np.array([config.table_margin + config.hole_radius * 3,
-                                config.resolution[0] / 2 + config.hole_radius * 3])
-            start_y = config.resolution[1] - config.table_margin - self.font.size(config.player1_target_text)[1] / 2
+                                config.resolution[
+                                    0] / 2 + config.hole_radius * 3])
+            start_y = config.resolution[1] - config.table_margin - \
+                      self.font.size(config.player1_target_text)[1] / 2
             # the text needs to be moved a bit lower to keep it aligned
-            self.image.blit(self.target_ball_text[0], [start_x[0], start_y + config.ball_radius / 2])
-            self.image.blit(self.target_ball_text[1], [start_x[1], start_y + config.ball_radius / 2])
+            self.image.blit(self.target_ball_text[0],
+                            [start_x[0], start_y + config.ball_radius / 2])
+            self.image.blit(self.target_ball_text[1],
+                            [start_x[1], start_y + config.ball_radius / 2])
             start_x += self.font.size(config.player2_target_text)[0]
             for ball in game_state.balls:
                 do_draw = ball.number != 0 and ball.number != 8
@@ -83,7 +91,8 @@ class TableColoring(pygame.sprite.Sprite):
 
                 # sorts the balls into their places
                 if do_draw:
-                    if game_state.ball_assignment[gamestate.Player.Player1] == ball.ball_type:
+                    if game_state.ball_assignment[
+                        gamestate.Player.Player1] == ball.ball_type:
                         draw_to_player.append(1)
                     else:
                         draw_to_player.append(2)
@@ -97,8 +106,10 @@ class TableColoring(pygame.sprite.Sprite):
                 # draws the balls
                 for player in draw_to_player:
                     # player-1 because lists start with 0
-                    ball.create_image(self.image, (start_x[player - 1], start_y))
-                    start_x[player - 1] += config.ball_radius * 2 + config.target_ball_spacing
+                    ball.create_image(self.image,
+                                      (start_x[player - 1], start_y))
+                    start_x[
+                        player - 1] += config.ball_radius * 2 + config.target_ball_spacing
 
     def generate_top_left_label(self, game_state):
         # generates the top left label (which players turn is it and if he can move the ball)
@@ -106,11 +117,13 @@ class TableColoring(pygame.sprite.Sprite):
         if game_state.can_move_white_ball:
             top_left_text += config.penalty_indication_text
         if game_state.current_player.value == 1:
-            top_left_rendered_text = self.font.render(config.player1_turn_label + top_left_text,
-                                                      False, config.player1_cue_color)
+            top_left_rendered_text = self.font.render(
+                config.player1_turn_label + top_left_text,
+                False, config.player1_cue_color)
         else:
-            top_left_rendered_text = self.font.render(config.player2_turn_label + top_left_text,
-                                                      False, config.player2_cue_color)
+            top_left_rendered_text = self.font.render(
+                config.player2_turn_label + top_left_text,
+                False, config.player2_cue_color)
         text_pos = [config.table_margin + config.hole_radius * 3,
                     config.table_margin - self.font.size(top_left_text)[1] / 2]
         self.image.blit(top_left_rendered_text, text_pos)

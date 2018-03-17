@@ -15,7 +15,9 @@ def set_max_resolution():
     global resolution
     global white_ball_initial_pos
     resolution = np.array([infoObject.current_w, infoObject.current_h])
-    white_ball_initial_pos = (resolution + [table_margin + hole_radius, 0]) * [0.25, 0.5]
+    white_ball_initial_pos = (resolution + [table_margin + hole_radius, 0]) * [
+        0.25, 0.5]
+
 
 # window settings
 fullscreen = False
@@ -31,8 +33,9 @@ table_side_color = (200, 200, 0)
 table_color = (0, 100, 0)
 separation_line_color = (200, 200, 200)
 hole_radius = 22
-middle_hole_offset = np.array([[-hole_radius * 2, hole_radius], [-hole_radius, 0],
-                               [hole_radius, 0], [hole_radius * 2, hole_radius]])
+middle_hole_offset = np.array(
+    [[-hole_radius * 2, hole_radius], [-hole_radius, 0],
+     [hole_radius, 0], [hole_radius * 2, hole_radius]])
 side_hole_offset = np.array([
     [- 2 * math.cos(math.radians(45)) * hole_radius - hole_radius, hole_radius],
     [- math.cos(math.radians(45)) * hole_radius, -
@@ -86,7 +89,8 @@ ball_starting_place_ratio = [0.75, 0.5]
 # in fullscreen mode the resolution is only available after initialising the screen
 # and if the screen wasn't initialised the resolution variable won't exist
 if 'resolution' in locals():
-    white_ball_initial_pos = (resolution + [table_margin + hole_radius, 0]) * [0.25, 0.5]
+    white_ball_initial_pos = (resolution + [table_margin + hole_radius, 0]) * [
+        0.25, 0.5]
 ball_label_text_size = 10
 
 # physics
@@ -94,6 +98,10 @@ ball_label_text_size = 10
 # friction threshold then it is stopped
 friction_threshold = 0.06
 friction_coeff = 0.99
+# 1 - perfectly elastic ball collisions
+# 0 - perfectly inelastic collisions
+ball_coeff_of_restitution = 0.9
+table_coeff_of_restitution = 0.9
 
 # menu
 menu_text_color = (255, 255, 255)

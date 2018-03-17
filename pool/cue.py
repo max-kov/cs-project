@@ -37,14 +37,16 @@ class Cue(pygame.sprite.Sprite):
             self.image.set_colorkey((200, 200, 200))
 
             sin_cos = np.array([math.sin(self.angle), math.cos(self.angle)])
-            initial_coords = np.array([math.sin(self.angle + 0.5 * math.pi), math.cos(self.angle +
-                                                                                      0.5 * math.pi)]) * config.cue_thickness
+            initial_coords = np.array([math.sin(self.angle + 0.5 * math.pi),
+                                       math.cos(self.angle +0.5 * math.pi)]) *\
+                                       config.cue_thickness
             coord_diff = sin_cos * config.cue_length
             rectangle_points = np.array((initial_coords, -initial_coords,
-                                         -initial_coords + coord_diff, initial_coords + coord_diff))
+                                         -initial_coords + coord_diff,
+                                         initial_coords + coord_diff))
             rectangle_points_from_circle = rectangle_points + self.displacement * sin_cos
-            pygame.draw.polygon(self.image, self.color,
-                                rectangle_points_from_circle + self.sprite_size)
+            pygame.draw.polygon(self.image, self.color,rectangle_points_from_circle
+                                + self.sprite_size)
 
             self.points_on_screen = rectangle_points_from_circle + self.target_ball.ball.pos
             self.rect = self.image.get_rect()
@@ -68,7 +70,8 @@ class Cue(pygame.sprite.Sprite):
 
     def update_cue_displacement(self, mouse_pos, initial_mouse_dist):
         displacement = physics.point_distance(
-            mouse_pos, self.target_ball.ball.pos) - initial_mouse_dist + config.ball_radius
+            mouse_pos,
+            self.target_ball.ball.pos) - initial_mouse_dist + config.ball_radius
         if displacement > config.cue_max_displacement:
             self.displacement = config.cue_max_displacement
         elif displacement < config.ball_radius:
@@ -80,7 +83,8 @@ class Cue(pygame.sprite.Sprite):
         cur_pos = np.copy(target_ball.ball.pos)
         diff = np.array([math.sin(angle), math.cos(angle)])
 
-        while config.resolution[1] > cur_pos[1] > 0 and config.resolution[0] > cur_pos[0] > 0:
+        while config.resolution[1] > cur_pos[1] > 0 and config.resolution[0] > \
+                cur_pos[0] > 0:
             cur_pos += config.aiming_line_length * diff * 2
             pygame.draw.line(game_state.canvas.surface, color, cur_pos,
                              (cur_pos + config.aiming_line_length * diff))
@@ -111,12 +115,13 @@ class Cue(pygame.sprite.Sprite):
         self.draw_lines(game_state, self.target_ball, self.angle +
                         math.pi, config.table_color)
 
-        if self.displacement > config.ball_radius+config.cue_safe_displacement:
+        if self.displacement > config.ball_radius + config.cue_safe_displacement:
             self.ball_hit()
 
     def ball_hit(self):
-        new_velocity = -(self.displacement - config.ball_radius - config.cue_safe_displacement) * \
-                       config.cue_hit_power * np.array([math.sin(self.angle), math.cos(self.angle)])
+        new_velocity = -(self.displacement - config.ball_radius -
+                         config.cue_safe_displacement) * config.cue_hit_power *\
+                       np.array([math.sin(self.angle), math.cos(self.angle)])
         change_in_disp = np.hypot(*new_velocity) * 0.1
         while self.displacement - change_in_disp > config.ball_radius:
             self.displacement -= change_in_disp
@@ -135,7 +140,8 @@ class Cue(pygame.sprite.Sprite):
         # hack to avoid div by zero
         if not displacement_from_ball_to_mouse[0] == 0:
             self.angle = 0.5 * math.pi - math.atan(
-                displacement_from_ball_to_mouse[1] / displacement_from_ball_to_mouse[0])
+                displacement_from_ball_to_mouse[1] /
+                displacement_from_ball_to_mouse[0])
             if displacement_from_ball_to_mouse[0] > 0:
                 self.angle -= math.pi
 

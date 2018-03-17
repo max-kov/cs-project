@@ -22,19 +22,21 @@ The main end users of this project are my school friends who are interested in p
 
 ## Available Alternatives
 
-Most pool games online are hosted on online game websites like www.miniclip.com. These games don't provide the source code for their game which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
+Most pool games online are hosted on online game websites like www.miniclip.com. At the time of writing this, the 8 ball pool game is the top game on the website and google says that the game was reviewed 1,563,388 times (Figure 1). This shows that there is a market for these types of games. Online websites don't provide the source code for their games which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
 
-I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  we're abandoned, or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them. 
+![The first result of Google search of "pool game"](figures/miniclip_reviews.png)
 
-There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page of the projects, some users are having problems installing the software[@githubissue].
+I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  we're abandoned, or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
 
-![](figures/installation_problems.png)
+There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page (Figure 1) of the projects, some users are having problems installing the software[@githubissue].
 
-Additionally, looking at commit messages, you can see that the main maintainer was trying to add advertisements to the game, which is a bad idea for this project, because ads will make the user experience worse[@githubads].
+![People having problems installing the pool game (GitHub issue)](figures/installation_problems.png)
 
-![](figures/ads.png)
+Additionally, looking at commit messages (Figure 2), you can see that the main maintainer was trying to add advertisements to the game, which is a bad idea for this project, because ads will make the user experience worse[@githubads].
 
-To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should have an instruction of how to install the game, so that users could acquire the game easily. Also, a 
+![GitHub commit message](figures/ads.png)
+
+To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should have an instruction of how to install the game, so that users could acquire the game easily. Also, there should be a configuration file, so that some properties of the game objects, e.g. ball size or ball colour, could be changed.
 
 ## Evidence of Analysis
 
@@ -50,13 +52,13 @@ _We have found some pool games online, but most of them are player vs AI and req
 
 __Is there anything specific you want in the game?__
 
-_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to tweak with the game options like cue hit power or the ball size._
+_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to tweak with the game options like the initial position of the balls._
 
-The user asked for standard features for this game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games. Other than that request, the user needs mostly reflect ones outlined in *Introduction*.
+The user asked for standard features for this type of game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games.
 
 ## Proposed Solution
 
-This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
+The project aim to build a pool game, with a minimal UI. The game will be mostly controlled through the mouse. The collisions and friction will be will have physical models (outlined later in this section). The game will be played on a single computer, with players taking turns to make their move. This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
 
 ### Collisions
 
@@ -130,12 +132,16 @@ $$
 \end{bmatrix}
 $$
 
-You can see the rotation represented on a 2d plane on the next figure.
+You can see the rotation represented on a 2d plane on Figure 3.
 
-![](figures/rotation.png)
+![Rotation in 2d plane](figures/rotation.png)
 
 ### Friction
 To model rolling friction I can use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
+
+## Classes
+
+The code in the project will be split into classes for maintainability and readability. Most classes will just encapsulate the methods and the properties related to them, for example, there will be a game state class, which will contain function which operate on the state of the game. The game state class will have methods that arrange the balls into initial position and check the rules. There will also be separate classes for every game object in the game.
 
 ### Language Choice
 At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
@@ -155,7 +161,7 @@ Finally, a game development library will be at the core of my project so it is i
   * The ball collisions should be inelastic
   * The game should detect and resolve ball-ball and ball-table side collisions
 * Game animations look realistic:
-  * The balls should visibly *rotate* when moving
+  * The balls should visibly rotate when moving
   * The cue should move towards the ball when a player is hitting a ball
 * A configuration file, which can change some of the in-game options like ball size or cue hit power
 * An installation guide/README file for users
@@ -163,7 +169,6 @@ Finally, a game development library will be at the core of my project so it is i
 ## Acceptable Limitations
 
 After researching the multiplayer feature, I think it will be unfeasible for me to implement it alone. Implementing multiplayer will require good theoretical knowledge of networking and sockets, but the main problem is that adding multiplayer will add a lot of validation problems between clients, this would require a server, which I don't have.
-
 
 # Documented Design
 
@@ -186,6 +191,14 @@ In-game interface will consist of the cue, which can be aimed and retracted back
 
 ![UI example figure](figures/ui_example1.png)
 
+### Modular Design
+
+* Main menu
+  * The game
+    * Stop the game
+    * Game over
+  * Quit the game
+
 ### Controls
 
 * The user will use the mouse to move the cue or the cue ball (if it is movable).
@@ -199,10 +212,31 @@ To implement the rules of pool I went online and read about the game rules[@pool
 * If the players haven't decided which group of balls they are on, and the player pots a ball or several balls of a particular group, that player now is on that group.
 * To win the game, you must pot the 8 ball legally.
 * You must first sink every ball from the group you are on, to pot the 8 ball.
-* Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit *from his hand* (which means that he is allowed to put the white ball anywhere on the table)
+* Failure to hit a ball from your group on your first ball hit, or not hitting a ball at all on your turn, gives your opponent a hit from his hand (which means that he is allowed to put the white ball anywhere on the table)
 * If you pot the 8 ball illegally, you lose the game.
 
+
 ## Algorithms
+
+### The main game loop
+
+Pseudocode:
+
+```
+while True:
+    while not game_is_over():
+        resolve_collisions()
+        move_everything()
+        redraw_everything()
+
+        if all_balls_stopped():
+            apply_pool_rules()
+            wait_for_cue_hit()
+```
+
+This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do one frame, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
+
+![game flow](figures/game_flowchart.png)
 
 ### Rendering
 
@@ -257,9 +291,55 @@ d = v_{z}sin(\frac{\phi}{2})
 
 With $\phi$ being the rotation angle and $\vec v=(v_{x},v_{y},v_{y})$ being the unit vector of the axis of the rotation[@matrixmathworld][@stanfordhandout1][@stanfordhandout2].
 
-Every frame the rotation matrix is calculated and applied to every vector in the line array. When the line is drawn, if the $z$-axis value of a vector is less than $0$, the point is ignored. That is because the centre of the ball is always at $z=0$ so anything below that is *under* the ball, and cannot be seen from a top-down view. So, before drawing the line array we filter out the every with $\vec k$ having $z\geq0$.
+Every frame the rotation matrix is calculated and applied to every vector in the line array. When the line is drawn, if the $z$-axis value of a vector is less than $0$, the point is ignored. That is because the centre of the ball is always at $z=0$ so anything below that is under the ball, and cannot be seen from a top-down view. So, before drawing the line array we filter out the every with $\vec k$ having $z\geq0$.
 
 The label will be tracked with a single point. That point will be on the top of the ball when it's initialised and will be rotated with the same rotation matrix outlined earlier. Additionally, the label will be scaled depending on the orientation of the ball. For example, when the label is facing to the side, the width of the label sprite is squashed to values close to 0. To get the scale factor of this transformation, I will use the formula $SF=rd$, where $r$ is the radius of the ball, and $d$ is the distance of the label to the edge of the ball from the top-down view. One important thing to note is that this is a heuristic method. This technique produces realistic results, but isn't how it exactly works in real life. One method which would produce better results is surfel modeling[@surfel], but implementing something that complex is out of the scope of this project.
+
+Pseudocode:
+
+Initialisation:
+
+```
+line_point_array = []
+delta_theta = 2*pi/point_num
+#point_num is the number of points used for the line
+for i in point_num:
+   line_point_array.append([cos(i*delta_theta),sin(i*delta_theta),0])
+label_point = [0,0,1]
+```
+
+Rotation matrix (taken from https://stackoverflow.com/a/6802723):
+
+```
+def rotation_matrix(axis, theta):
+    axis = axis/pythagorean_distance(axis)
+    a = cos(theta/2)
+    b, c, d = -axis*sin(theta/2)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return [[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+           [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+           [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]]
+```
+
+Applying the matrix:
+
+```
+rotation_angle = ball.speed  / ball_radius
+perpendicular_velocity_vector = [-ball.velocity[1], ball.velocity[0], 0]
+rotation_matrix = rotation_matrix(perpedicular_velocity_vector, rotation_angle)
+for point in line_point_array:
+    point = matrix_multiplication(point, rotation_matrix)
+label_point = matrix_multiplication(label_point, rotation_matrix)
+```
+
+Drawing the stripe:
+
+```
+for i in point_num:
+    if line_point_array[i][2]>=0 and line_point_array[i+1][2]>=0:
+        draw_line(line_point_array[i], line_point_array[i+1])
+```
 
 ### Object Movement
 
@@ -275,9 +355,15 @@ One way detect a ball-ball collision is to check the distances between ball cent
 
 ![](figures/ball_collision1.png)
 
+Pseudocode:
+
+```
+return (pythagorean_distance(ball1.pos-ball2.pos)<=2*ball_radius)
+```
+
 #### Ball-Pocket
 
-In the game, any ball which has its _centre of mass_ inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
+In the game, any ball which has its centre of mass inside a pocket is considered potted and is instantly removed from the game. Therefore, the algorithm only needs to check if the distance from the centre of the ball to the centre of the pocket is smaller than the radius of the pocket, and if it is, the ball is removed.
 Because pockets are modeled as spheres, we use the same algorithm to detect collisions for both balls and pockets.
 
 #### Ball-Line
@@ -288,7 +374,7 @@ This collision is called ball-line, because the table walls are modeled as lines
 
 ![](figures/lineballcollision2.png)
 
-We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the _projection point_ (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare that distance to the balls radius to determine if the ball is colliding with the line.
+We know the position of the ball centre, its radius, and 2 points (p1 and p2 on the figure) which define the line. First we find the unit vector of the line (vector from p1 to p2) and the distance vector from one of the points to the ball centre (blue line on the figure). Then we get the distance from p1 to the perpendicular projection point using the _dot product_ on the aforementioned vectors. Note that the result will be a scalar quantity. To get the actual projection point we multiply the scalar value by the unit line displacement vector we got earlier to get the projection point (as labeled on the figure). Then we can get the perpendicular distance from the line to the ball centre by using Pythagorean theorem. We can compare that distance to the balls radius to determine if the ball is colliding with the line.
 
 However, there is one final caveat:
 
@@ -296,11 +382,45 @@ However, there is one final caveat:
 
 it's possible for the projected point to be outside of the line. To check that its not the case, we check that the distance from p1 and p2 to the projected point is less than the length of the line (distance from p1 to p2).
 
+Pseudocode:
+
+```
+#line[0] is the first point of the line and
+#line[1] is the second point of the line
+displacement_to_ball = ball.pos - line[0]
+displacement_to_second_point = line[1] - line[0]
+normalised_point_diff_vector = displacement_to_second_point /
+        pythagorean_distance(displacement_to_second_point)
+#distance from the first point to the perpendicular point on
+#the line
+projected_distance = dot_product(normalised_point_diff_vector,
+                       displacement_to_ball)
+closest_line_point = projected_distance * normalised_point_diff_vector
+return (0 <= projected_distance <= pythagorean_distance(displacement_to_second_point)) and
+    (pythagorean_distance(closest_line_point - ball.pos + line[0]) <= ball_randius)
+```
+
 ### Collision resolution
 
 #### Ball-Line
 
- As mentioned in Analysis, when a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
+As mentioned in Analysis, when a ball collides with a line the perpendicular component of the balls velocity to the line is reversed and multiplied by $\frac{1+e}{2}$. The component parallel to the line is unchanged. This is because the force from the wall on the ball is applied strictly perpendicularly to the line.
+
+
+Pseudocode:
+
+```
+#line[0] is the first point of the line and
+#line[1] is the second point of the line
+displacement_to_second_point = line[1] - line[0]
+normalised_point_diff_vector = displacement_to_second_point /
+                           pythagorean_distance(displacement_to_second_point)
+perpendicular_vector = [-normalised_point_diff_vector[1], normalised_point_diff_vector[0]]
+#the vector is multiplied by 2 to cancel out the initial velocity
+#and then reverse it
+ball.velocity = ball.velocity - 2 * dot_product(perpendicular_vector, ball.velocity) *
+                perpendicular_vector * (1 + table_coeff_of_restitution) / 2
+```
 
 #### Ball-Ball
 
@@ -324,6 +444,23 @@ To summarise, we split the ball velocities into 2 vectors: one vector - $V_a$, w
 $$
 V'_1=\frac{(1+e)}{2}V_{a2}+V_{b1}
 $$
+Pseudocode:
+
+```
+point_diff = ball2.pos - ball1.pos
+distance = pythagorean_distance(ball1.position, ball2.position)
+collision_vector = point_diff / distance
+# rotate the vector 90 degrees clockwise to get the perpendicular vector
+perpindicular_collision_vector = [collision_vector[1], -collision_vector[0]]
+Va1 = dot_product(ball1.velocity, collision_vector)
+Vb1 = dot_product(ball2.velocity, collision_vector)
+Va2 = dot_product(ball1.velocity, perpindicular_collision_vector)
+Vb2 = dot_product(ball2.velocity, perpinducular_collision_vector)
+ball1.velocity = Vb1 * collision * (1 + ball_coeff_of_restitution)/2
+                + Va2*perpendicular_collision_vector
+ball2.velocity = Va1 * collision * (1 + ball_coeff_of_restitution)/2
+                + Vb2*perpendicular_collision_vector
+```
 
 ### Cue Click Detection
 
@@ -337,35 +474,30 @@ The area of the green triangles equals the area of the cue, therefore the click 
 
 The user clicks on the blue dot which is outside the black cue. The sum of the areas of the green triangles is greater than the area of the cue, thus the point is outside of the cue.
 
-### The main game loop
-
 Pseudocode:
 
 ```
-while True:
-    while not game_is_over():
-        resolve_collisions()
-        move_everything()
-        redraw_everything()
-
-        if all_balls_stopped():
-            apply_pool_rules()
-            wait_for_cue_hit()
+#rectangle is an array of 2d points which define the cue
+#rectangle[0] to rectangle[1] must be the tip of the cue
+#for this to work
+#point is a 2d point (the coordinates of users click)
+inner_lines = [ pythagorean_distance(point, rectangle[0]),
+                pythagorean_distance(point, rectangle[1]),
+                pythagorean_distance(point, rectangle[2]),
+                pythagorean_distance(point, rectangle[3])]
+triangle_areas = [  herons(inner_lines[0],inner_lines[1],cue_width)
+                    herons(inner_lines[1],inner_lines[2],cue_length),
+                    herons(inner_lines[2],inner_lines[3],cue_width),
+                    herons(inner_lines[3],inner_lines[0],cue_length)]
+rect_area = cue_length * cue_width
+return rect_area >= sum(triangle_areas)
 ```
 
-This is the whole game split into functions. Every turn, one player uses the cue, then while the balls are moving, the game will check for any collisions, resolve them and do one frame, meaning it will move every moving object and redraw everything. The main game loop will continue doing that until the game is over or the game is closed.
+## Installation
 
-![game flow](figures/game_flowchart.png)
+As seen in analysis, GitHub users had problems installing other games like this. I will add instructions for installing the game for Windows and Linux in the README file of the game.
 
-
-
-### Modular Design
-
-* Main menu
-  * The game
-    * Stop the game
-    * Game over
-  * Quit the game
+I will also make a simple shell script for Linux which will create a virtual environment and install every dependency through PIP.
 
 ### Development considerations
 
@@ -381,19 +513,9 @@ For managing dependencies I chose pip (all project requirements are specified in
 
 ## Game Objects and Classes
 
-Most game objects, like balls and cue, will be encapsulated into separate classes with  for the ease of testing and maintaining.
+Most game objects, like balls and cue, will be encapsulated into separate classes with for the ease of testing and maintaining. These classes will have methods and properties associated to them. For example, the ball class (figure 13) will be split in 4 different classes - the mathematical part of the ball, which will have things like the position and velocity vector as well as movement and force vectors. Then there will be 2 types of ball sprites - balls with solid color and balls with a stripe. I decided to go with the rule of thumb "composition over inheritance" and create instances of those classes in the main class instead of inheriting them. Double inheritance is possible in Python, however it introduces ambiguity and unneeded complexity.
 
-![game_state](figures/object_diagram_gamestate.png)
-
-![cue](figures/object_diagram_cue.png)
-
-![ball](figures/object_diagram_ball.png)
-
-![table sprites](figures/object_diagram_tablesprites.png)
-
-![events](figures/object_diagram_event.png)
-
-![graphics](figures/object_diagram_graphics.png)
+![Ball object classes](figures/object_diagram_ball2.png)
 
 ## Input Validation
 
@@ -472,40 +594,55 @@ cat pool/config.py
 
 ### "Reverse" Shot Bug
 
-If the cue is brought very close to the white ball, the game might think that the cue is inside the ball. That results into negative displacement, which when then produces a negative force on the ball (because the force from the cue on the ball is calculated based on it's displacement from the ball).
+If the cue is brought very close to the white ball, the game sometimes applied the force in the other direction on the ball, meaning the ball would move towards the ball after the hit.
+
+```
+new_velocity = -(self.displacement - config.ball_radius - config.cue_safe_displacement) * \
+        config.cue_hit_power * np.array([math.sin(self.angle), math.cos(self.angle)])
+```
+
+The game calculated the new velocity of the ball using this formula. `self.displacement` is the displacement of the cue from the centre of the ball, `config.cue_safe_displacement` is the distance from the ball the cue could be displaced and released without affecting the ball. Here is the if statement which check if a ball hit went through.
+
+```
+if self.displacement > config.ball_radius:
+    self.ball_hit()
+```
+
+The if statement was missing the `config.cue_safe_displacement`, therefore if the cue was brought really close to the ball and if the value of `config.cue_safe_displacement` was bigger that zero, `self.displacement - config.ball_radius - config.cue_safe_displacement` could be less than zero and so reverse the direction of the hit.
 
 Code changed (pool/cue.py line 114)[@reverseshotcommit]:
 
 ```
 -        if self.displacement > config.ball_radius:
 +        if self.displacement > config.ball_radius+config.cue_safe_displacement:
+            self.ball_hit()
 ```
 
-The new variable `config.cue_safe_displacement` is defined in the configuration file, and defines how far the cue can be displaced, before the ball will be affected. For example, if the user displaces the cue by 10 units, but and `config.cue_safe_displacement` is 15, if the user releases the cue, the ball will be unaffected, and the cue will be returned into its initial position.
+This change will insure that `self.displacement - config.ball_radius - config.cue_safe_displacement` will be bigger than zero, thus fixing the bug.
 
 ### Collision Resolution Bug
 
-Sometimes, during the play of the game, the balls would sometimes "stick" to each other. Turns out there was a problem with the resolution of the collision, or more precisely, when it was triggered.
+Sometimes, during the play of the game, the balls would "stick" to each other. Turns out there was a problem with the resolution of the collision, or more precisely, when it was triggered.
 
-The problem is caused by when 2 balls overlap. When the balls collide, there will inevitably will be some overlap, at least because of rounding errors. If the balls are moving quickly, the overlap may be significant.
+Collisions are checked for every frame. Figure 18 shows a possible position of the balls 1 frame before the collision and figure 19 shows the same balls in the next frame. The problem is caused by the ball overlap. When the balls collide, there will be some overlap and if the balls are moving quickly, the overlap might be significant.
 
-![](figures/ball_overlap1.png)
+![one frame before the collision](figures/ball_overlap1.png)
 
-![collision with overlap](figures/ball_overlap2.png)
+![collision](figures/ball_overlap2.png)
 
-Because the collision is inelastic one of the balls (or both) will lose some kinetic energy, and will therefore will be moving slower than before. If the balls are moving approximately towards each other, both of the balls will be moving slower.
+Because the collision is inelastic the balls will lose some kinetic energy, therefore they will be moving slower after collision (as shown on figure 20).
 
-![collision with overlap](figures/ball_overlap3.png)
+![one frame after the collision](figures/ball_overlap3.png)
 
-Because of this loss of velocity, sometimes after colliding and moving once (one frame) they will still be inside each other, and thus the collision detection algorithm will trigger in the next frame again. If collision resolution algorithm is called on balls which are moving in opposite directions, the vectors will be reversed, and on the next frame the balls will be moving __towards__ each other, making the process repeat indefinitely, which in turn makes the balls stick.
+After colliding and moving once (one frame) they balls can still be inside each other, and thus the collision detection algorithm will trigger in the next frame again. If collision resolution algorithm is called on balls which are moving in opposite directions, the vectors will be reversed, and on the next frame the balls will be moving towards each other, making the process repeat indefinitely, which in turn makes the balls stick.
 
-![collision with dot product](figures/ball_collision3.png)
+![vectors with dot product](figures/ball_collision3.png)
 
-To resolve the collision properly we will take the dot product of the difference between the centres of 2 balls (labeled _distance diff_ on the figure) and the velocity difference vector (labeled as _v1-v2_ on the figure). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
+To resolve the collision properly we will take the dot product of the difference between the centres of 2 balls (labeled _distance diff_ on figure 21) and the velocity difference vector (labeled as _v1-v2_). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
 
 __Code changed__:
 
-First addition (in function *collide_balls*)[@ballcollisioncommit]:
+Added the dot product check in function *collide_balls*[@ballcollisioncommit]:
 
 ```
 +def collide_balls(ball1, ball2):
@@ -548,7 +685,7 @@ def test_movement4(self):
     assert not physics.ball_collision_check(ball1, ball2)
 ```
 
-![test1](figures/test1.png)
+![test 1](figures/test1.png)
 
 The test sets the balls such that they are touching, however, both balls are moving with the same velocity. That means there is no collision.
 
@@ -566,7 +703,7 @@ The values in the test are exaggerated so that we know that the game can handle 
 
 ![test2](figures/test2.png)
 
-For executing tests I used PyTest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service. 
+For executing tests I used PyTest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service.
 
 ### How To Run the Tests
 
