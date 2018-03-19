@@ -2,7 +2,7 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-  html_document:
+    html_document:
         toc: true
         toc_depth: 2
 bibliography: references.bib
@@ -14,33 +14,29 @@ csl: refstyle.csl
 
 ## Introduction
 
- Even though the video game industry didn't exist 4 decades ago, it is now one of the most popular hobbies of youth nowadays. With new variations on the original idea like mobile games and virtual reality games, it is likely that these games are here to stay for a long time. This project is about making a 8 ball pool game with a top down view that can be played by 2 players on the same computer.
+ Even though the video game industry didn't exist 4 decades ago, it is now one of the most popular hobbies of youth. With new variations idea like mobile games and virtual reality games, it is likely that these games are here to stay for a long time. This project is about making an 8 ball pool game with a top down view that can be played by 2 players on the same computer.
 
-## Identification of End Users
+## Existing Solutions
 
-The main end users of this project are my school friends who are interested in playing a computer version of pool. The code will include the physical formulas of collisions and friction, and because this project will open-source and available online, this game might help other people to understand how 2-dimensional ball physics work.
-
-## Available Alternatives
-
-Most pool games online are hosted on online game websites like www.miniclip.com. At the time of writing this, the 8 ball pool game is the top game on the website and google says that the game was reviewed 1,563,388 times (Figure 1). This shows that there is a market for these types of games. Online websites don't provide the source code for their games which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
+Most pool games online are hosted on online game websites like www.miniclip.com. At the time of writing this, the 8 ball pool game is the top game on the website and google says that the game was reviewed 1,563,388 times (Figure 1). This shows that there is a market for these types of games. The problem is, online websites don't provide the source code for their games which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
 
 ![The first result of Google search of "pool game"](figures/miniclip_reviews.png)
 
-I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  we're abandoned, or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
+I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  were abandoned or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
 
 There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page (Figure 1) of the projects, some users are having problems installing the software[@githubissue].
 
 ![People having problems installing the pool game (GitHub issue)](figures/installation_problems.png)
 
-Additionally, looking at commit messages (Figure 2), you can see that the main maintainer was trying to add advertisements to the game, which is a bad idea for this project, because ads will make the user experience worse[@githubads].
+Additionally, looking at commit messages (Figure 2), you can see that the main maintainer was trying, albeit unsuccessfully, to add advertisements to the game, which is a bad idea because ads will make the user experience worse[@githubads].
 
 ![GitHub commit message](figures/ads.png)
 
-To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should have an instruction of how to install the game, so that users could acquire the game easily. Also, there should be a configuration file, so that some properties of the game objects, e.g. ball size or ball colour, could be changed.
+To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should come with an instruction of how to install the game, so that users could acquire the game easily. Also, there should be a configuration file, so that some properties of the game objects could be changed, e.g. ball size or ball colour.
 
 ## Evidence of Analysis
 
-To better understand the problem I had to solve, I decided to interview one of my sixth form classmates about it:
+To get more insight to the problem I had to solve and to understand which features I had to implement, I decided to interview one of my sixth form classmates about it:
 
 __What are the problems with the current system?__
 
@@ -56,13 +52,19 @@ _A normal pool game with rules for 2 players should suffice. It shouldn't be too
 
 The user asked for standard features for this type of game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games.
 
+## Identification of End Users
+
+The main end users of this project are my school friends who are interested in playing a computer version of pool. The code will include the physical formulas of collisions and friction, and because this project will open-source and available online, this game might help other people to understand how 2-dimensional ball physics work.
+
 ## Proposed Solution
 
-The project aim to build a pool game, with a minimal UI. The game will be mostly controlled through the mouse. The collisions and friction will be will have physical models (outlined later in this section). The game will be played on a single computer, with players taking turns to make their move. This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
+The aim of the project is to build a pool game. Looking at other games online, it would be wise to add a user interface, however there aren't a lot of features which complement a user interface (like save games or in-game soundtrack), so the user interface could be minimal. The user interface will include a main menu and in-game game state trackers (things like current player labels). The collisions and friction will be will have physical models (outlined later in this section). The game will be played on a single computer, with players taking turns to make their move.  Finally, the user interview revealed a need for some sort of configuration option in the game. I think the best way to achieve that would be a configuration file, which is a text file with all of the constant variables in it. That way, if the user wants to change the color of a particular ball, they would be able to do it by changing a variable in the configuration file. This method is easy to implement and provides the highest level of customization possible.
+
+This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
 
 ### Collisions
 
-To simulate ball collisions, every frame the game will check for these collisions by comparing the distances between ball centres, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations. To model ball-ball and ball-table side collisions I can use the inelastic collision formula[@inelasticcollision]. The formula depends on the *coefficient of restitution* - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of kinetic energy lost in collision and visa versa.
+To simulate ball collisions, every frame the game will check for these collisions by comparing the distances between ball centres, and if it detects any, it will resolve the collision based on the velocity and the position of the balls using linear algebra and vector operations. To model ball-ball and ball-table side collisions I can use the inelastic collision formula[@inelasticcollision]. The formula depends on the coefficient of restitution - $e$, whose values range from 0 to 1 (1 being a perfectly elastic collision and 0 perfectly inelastic). Low values of $e$ mean that there is a lot of kinetic energy lost in collision and visa versa.
 
 ### Rendering
 Some parts of the balls (like the white stripe around the balls) can be modeled as 3d objects and rotated using rotation matrices when the ball is moving and then projected on the table (into a 2d space). Matrices are rectangular arrays which enable us to do spacial transformations of objects. Here is an example of a matrix:
@@ -139,10 +141,6 @@ You can see the rotation represented on a 2d plane on Figure 3.
 ### Friction
 To model rolling friction I can use the formula $F=C_{rr}N$ where $C_{rr}$ is the coefficient of rolling resistance of the balls[@rollingfriction]. That means the balls will have a constant frictional force on them (when they are moving).
 
-## Classes
-
-The code in the project will be split into classes for maintainability and readability. Most classes will just encapsulate the methods and the properties related to them, for example, there will be a game state class, which will contain function which operate on the state of the game. The game state class will have methods that arrange the balls into initial position and check the rules. There will also be separate classes for every game object in the game.
-
 ### Language Choice
 At the beginning of the project, I was experienced in two programming languages - Python and Pascal. To pick one, I had to do some research on their suitability for the job.
 
@@ -168,7 +166,7 @@ Finally, a game development library will be at the core of my project so it is i
 
 ## Acceptable Limitations
 
-After researching the multiplayer feature, I think it will be unfeasible for me to implement it alone. Implementing multiplayer will require good theoretical knowledge of networking and sockets, but the main problem is that adding multiplayer will add a lot of validation problems between clients, this would require a server, which I don't have.
+After researching the multiplayer feature, I think it will be unfeasible for me to implement it alone. Implementing multiplayer will require good theoretical knowledge of networking and sockets, but the main problem is that adding multiplayer will add a lot of validation problems between clients. Additionally, this feature would most likely require a server, which I don't have.
 
 # Documented Design
 
@@ -185,11 +183,11 @@ A good pool game should implement the following features:
 
 In-game interface will consist of the cue, which can be aimed and retracted back to make a shot. The game will also have some indicators of the state of the game:
 
-* A "current player" indicator (which can just be a label on the top)
-* An indicator of which balls the players need to pot to win the game
+* A "current player" indicator, which can just be a label on the top
+* An indicator of which group of balls the players need to pot to win the game
 * An indicator of whether the current player can move the cue ball
 
-![UI example figure](figures/ui_example1.png)
+![ingame GUI design](figures/ui_example1.png)
 
 ### Modular Design
 
@@ -343,7 +341,7 @@ for i in point_num:
 
 ### Object Movement
 
-Most objects which appear in the game will have a velocity vector and a position vector. Every frame the computer will erase the old object and redraw it on its new position to simulate movement. For example, to simulate ball movement the computer will draw a circle of the background color on top of the old rendition of the ball (thus erasing it), add the velocity vector to the position vector of the ball and then draw a new rendering on its updated position.
+Most objects which appear in the game will have a velocity vector and a position vector. Every frame the computer will move the objects and then draw the new frame to simulate movement. For example, to simulate ball movement the computer will start drawing the background and the table sides, then add the velocity vector to the position vector of the ball and then draw a new rendering on its updated position.
 
 If the objects don't move too fast and the game is running at moderate frames-per-second, the movement will look smooth.
 
@@ -464,7 +462,17 @@ ball2.velocity = Va1 * collision * (1 + ball_coeff_of_restitution)/2
 
 ### Cue Click Detection
 
-Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using herons formula.
+Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using Heron's formula:
+
+$$
+A = \sqrt{s(s-a)(s-b)(s-c)}
+$$
+
+Where $s$ is the semiperimeter of the triangle:
+
+$$
+s = \frac{a+b+c}{2}
+$$
 
 ![click inside cue](figures/cue1.png)
 
@@ -513,7 +521,9 @@ For managing dependencies I chose pip (all project requirements are specified in
 
 ## Game Objects and Classes
 
-Most game objects, like balls and cue, will be encapsulated into separate classes with for the ease of testing and maintaining. These classes will have methods and properties associated to them. For example, the ball class (figure 13) will be split in 4 different classes - the mathematical part of the ball, which will have things like the position and velocity vector as well as movement and force vectors. Then there will be 2 types of ball sprites - balls with solid color and balls with a stripe. I decided to go with the rule of thumb "composition over inheritance" and create instances of those classes in the main class instead of inheriting them. Double inheritance is possible in Python, however it introduces ambiguity and unneeded complexity.
+The code in the project will be split into classes for the ease of testing and readability. Most classes will just encapsulate the methods and the properties related to them, for example, there will be a game state class, which will contain functions which operate on the state of the game, e.g. methods that arrange the balls into their initial triangular position at the start of the game.
+
+There will also be separate classes for every game object in the game. For example, the ball class (figure 13) will be split in 4 different classes - the mathematical part of the ball, which will have things like the position and velocity vector as well as methods which allow to apply a force to the ball. Then there will be 2 types of ball sprites - balls with solid color and balls with a stripe. Finally, there will be a ball sprite class which has an instance of the mathematical ball and one of the sprite classes. I decided to go with the rule of thumb "composition over inheritance" and create instances of those classes in the main sprite class instead of inheriting them. Double inheritance is possible in Python, however it introduces ambiguity and unneeded complexity.
 
 ![Ball object classes](figures/object_diagram_ball2.png)
 
@@ -527,68 +537,7 @@ When a player is allowed change the game state, we must make sure that the playe
 
 # Technical solution
 
-## main.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/main.py
-```
-
-## gamestate.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/gamestate.py
-```
-
-## physics.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/physics.py
-```
-
-## collisions.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/collisions.py
-```
-
-## ball.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/ball.py
-```
-
-## cue.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/cue.py
-```
-
-## graphics.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/graphics.py
-```
-
-## table_sprites.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/table_sprites.py
-```
-
-## event.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/event.py
-```
-
-## config.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/config.py
-```
-
-
-# Testing
+Disclaimer: the `rotation_matrix` function in physics.py was taken from https://stackoverflow.com/a/6802723
 
 ## Bugs Fixed During the Development of the Program
 
@@ -664,6 +613,70 @@ def ball_collision_check(ball1, ball2):
         np.count_nonzero(np.concatenate((ball1.velocity, ball2.velocity))) > 0 and \
         np.dot(ball2.pos - ball1.pos, ball1.velocity - ball2.velocity) > 0
 ```
+
+
+## main.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/main.py
+```
+
+## gamestate.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/gamestate.py
+```
+
+## physics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/physics.py
+```
+
+## collisions.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/collisions.py
+```
+
+## ball.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/ball.py
+```
+
+## cue.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/cue.py
+```
+
+## graphics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/graphics.py
+```
+
+## table_sprites.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/table_sprites.py
+```
+
+## event.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/event.py
+```
+
+## config.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/config.py
+```
+
+
+# Testing
 
 ## White Box Testing (Unit Testing)
 In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing, because I am testing specific functions of the program.
@@ -748,15 +761,53 @@ TOTAL                     736    501    32%
 
 Tests for other builds and instructions on how to run the tests yourself can be found on the GitHub repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on GitHub^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
 
+## Conventional Tests
+
+These test are do by me playing the game:
+
+### GUI
+* Buttons light up when you hover over them
+* Buttons work
+
+### Collisions
+* ball-pocket collisions
+* Ball-ball collisions
+* Ball-wall collisions
+
+### Controls
+* Pressing ESC in game will leave to the main menu
+* The ball cannot be moved outside of the table, or into other balls, when it can be moved
+* Cue clicks work
+
+### Game Rules
+* The game ends if you pot the 8ball illegally, and the player who potted the ball loses the game
+* The game ends if you pot the 8ball legally, and the player who potted the ball wins the game
+* If the player pots a ball of a color, and the groups are not assigned yet, the player who potted the ball is assigned to that group
 
 # Evaluation
 
 ## Objective Analysis
 
+Here are the objectives set for this project:
+* The rules of pool should be implemented in the game
+* The game should run at more than 30 frames per second
+* Physical interactions in the game should be realistic:
+  * The movement of the balls should be affected by friction
+  * The ball collisions should be inelastic
+  * The game should detect and resolve ball-ball and ball-table side collisions
+* Game animations look realistic:
+  * The balls should visibly rotate when moving
+  * The cue should move towards the ball when a player is hitting a ball
+* A configuration file, which can change some of the in-game options like ball size or cue hit power
+* An installation guide/README file for users
+
+Collisions, ball movement and game rules were tested in Testing section.
+
+
 ## User Feedback
 
-## Analysis of User Feedback
-
 ## Possible Extensions
+
+multiplayer, stripe approximations sounds.
 
 # References
