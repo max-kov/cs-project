@@ -2,7 +2,7 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 output:
-    html_document:
+    pdf_document:
         toc: true
         toc_depth: 2
 bibliography: references.bib
@@ -246,12 +246,11 @@ The ball can be split in 3 parts which must be rendered separately:
 
 ![Initial position of the ball](figures/ball1.png)
 
-![A possible position of the ball](figures/ball2.png)
+![A rotated position of the ball](figures/ball2.png)
 
 A sphere of a solid color will look like a circle from any angle in 2-dimensions. That's why we don't need to worry about any rotations of the solid sphere component. Hence we can just draw the solid body as a solid circle and draw everything else on top.
 
-The stripe on the ball will be modeled as an array of 3-dimensional vectors ($\vec k = (x,y,z)$). The line array $a$ is defined as
-
+The stripe on the ball will be modelled as a sequence of connected lines, forming a circle. The lines will be represented with an array of vectors $a$ marking the start/end points of the lines.
 $$
 a=
 \begin{bmatrix}
@@ -261,7 +260,7 @@ $$
 
 Where $\vec k_n$ is a 3d vector on the surface of the ball. We will draw lines from $\vec k_1$ to $\vec k_2$, from $\vec k_2$ to $\vec k_3$ and so on for every adjacent pair of points (a line from $\vec k_{i-1}$ to $\vec k_{i}$ for $i\in[2,n]$). This will draw a polygon that very closely follows the shape of the stripe.
 
-When the ball moves the line array is rotated using rotation matrices. A 3d rotation matrix can be calculated from a rotation axis and an angle through which the ball needs to be rotated. We know the axis of rotation - it is the line perpendicular to the velocity vector and parallel to the table surface, and the angle of rotation is calculated using the formula
+When a ball rotates, the points representing the ball's stripe are transformed accordingly by multiplying them with a rotation matrix. A 3d rotation matrix can be calculated from a rotation axis and an angle through which the ball needs to be rotated. We know the axis of rotation - it is the line perpendicular to the velocity vector and parallel to the table surface, and the angle of rotation is calculated using the formula
 $$
 \theta=\frac{vt}{r}
 $$
@@ -460,9 +459,17 @@ ball2.velocity = Va1 * collision * (1 + ball_coeff_of_restitution)/2
                 + Vb2*perpendicular_collision_vector
 ```
 
-### Cue Click Detection
+### Cue
 
-Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using Heron's formula:
+#### Overall cue design
+
+The cue will be modeled as a rectangle with 4 points. The cue will always point at the ball, but it can be rotated around the cue ball. The cue can also be retracted or displaced from the ball. Therefore, the cue object will have to store it's angle to the horizontal and the displacement from the ball.
+
+The user will be able to click and move the cue around. If the cue was retracted when the mouse button was released, the cue will move towards the ball, and then it will exert a force on the ball, causing it to move. The speed with which the cue moves towards the ball will be proportional to the distance it was retracted.
+
+#### Click detection
+
+I will have to make an algorithm, which detects whether a click on the screen is in the cue, from the coordinates of the click. Because the cue is modeled as a rectangle, the problem here can be simplified down to figuring out if a 2d point (the coordinates of the click) is in a rectangle (which is defined with 4 2d points). To do that we find the area of 4 triangles which can be made with 4 rectangle points and the points. We can find the area of triangles using Heron's formula:
 
 $$
 A = \sqrt{s(s-a)(s-b)(s-c)}
@@ -507,18 +514,6 @@ As seen in analysis, GitHub users had problems installing other games like this.
 
 I will also make a simple shell script for Linux which will create a virtual environment and install every dependency through PIP.
 
-### Development considerations
-
-#### Version Control
-
-To be more productive and avoid code loss situations, I will use version control, specifically git, which is the most popular version control framework [@versioncontrol]. Storing a git repository exclusively on a local machine is dangerous since in case of a disk failure all data is lost. To ensure this never occurs, I will regularly upload my code to GitHub, which is a cloud service which allows storing git repositories on their server.
-
-#### Additional Libraries and Library Management
-
-For complex mathematical operations (mostly matrix operations in this project), I used Numpy, a numerical library for python which in addition to a wide range of scalar functions provides a multitude of vector functions.
-
-For managing dependencies I chose pip (all project requirements are specified in requirements.txt), which is a common dependency manager used for python.
-
 ## Game Objects and Classes
 
 The code in the project will be split into classes for the ease of testing and readability. Most classes will just encapsulate the methods and the properties related to them, for example, there will be a game state class, which will contain functions which operate on the state of the game, e.g. methods that arrange the balls into their initial triangular position at the start of the game.
@@ -537,7 +532,9 @@ When a player is allowed change the game state, we must make sure that the playe
 
 # Technical solution
 
-Disclaimer: the `rotation_matrix` function in physics.py was taken from https://stackoverflow.com/a/6802723
+Disclaimer: the rotation_matrix function in physics.py was taken from https://stackoverflow.com/a/6802723
+
+To be more productive and avoid code loss situations, I decided to use version control. Specifically git, which is the most popular version control framework [@versioncontrol]. Storing a git repository exclusively on a local machine is dangerous since in case of a disk failure all data is lost. To ensure this never occurs, I regularly uploaded my code to github, which is a cloud service which allows storing git repositories on their server. For complex mathematical operations, I used numpy, a numerical library for python which in addition to a wide range of scalar functions provides a multitude of vector functions. For executing tests I used pytest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to github. For this I used the Travis CI service. Finally, for managing dependencies I chose pip (all project requirements are specified in requirements.txt), which is a common dependency manager used for python.
 
 ## Bugs Fixed During the Development of the Program
 
@@ -614,7 +611,6 @@ def ball_collision_check(ball1, ball2):
         np.dot(ball2.pos - ball1.pos, ball1.velocity - ball2.velocity) > 0
 ```
 
-
 ## main.py
 
 ```{r engine='bash', comment='', echo=F}
@@ -675,10 +671,9 @@ cat pool/event.py
 cat pool/config.py
 ```
 
-
 # Testing
 
-## White Box Testing (Unit Testing)
+## Unit Testing
 In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing, because I am testing specific functions of the program.
 To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
 
@@ -716,14 +711,35 @@ The values in the test are exaggerated so that we know that the game can handle 
 
 ![test2](figures/test2.png)
 
-For executing tests I used PyTest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service.
+For executing tests I used PyTest, a popular python unit-testing library. I set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service.
 
 ### How To Run the Tests
 
-The file contains many tests, including matrix transformation tests, line to ball collision tests and the triangle area test. Here is the file itself:
+The file contains many tests, including matrix transformation, line to ball collision and the triangle area tests. Here are the test files:
 
+#### test_ball_line_collision.py
 ```{r engine='bash', comment='', echo=F}
-cat tests/test_physics.py
+cat tests/test_ball_line_collision.py
+```
+
+#### test_ball_ball_collision.py
+```{r engine='bash', comment='', echo=F}
+cat tests/test_ball_ball_collision.py
+```
+
+#### test_distance.py
+```{r engine='bash', comment='', echo=F}
+cat tests/test_distance.py
+```
+
+#### test_rotation_matrix.py
+```{r engine='bash', comment='', echo=F}
+cat tests/test_rotation_matrix.py
+```
+
+#### test_triangle_area.py
+```{r engine='bash', comment='', echo=F}
+cat tests/test_triangle_area.py
 ```
 
 Here is me running the tests on my machine on the latest pool build.
@@ -761,25 +777,30 @@ TOTAL                     736    501    32%
 
 Tests for other builds and instructions on how to run the tests yourself can be found on the GitHub repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on GitHub^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
 
+
 ## Conventional Tests
 
-These test are do by me playing the game:
+These test will be done by me playing the game:
 
 ### GUI
+
 * Buttons light up when you hover over them
 * Buttons work
 
 ### Collisions
+
 * ball-pocket collisions
 * Ball-ball collisions
 * Ball-wall collisions
 
 ### Controls
+
 * Pressing ESC in game will leave to the main menu
 * The ball cannot be moved outside of the table, or into other balls, when it can be moved
 * Cue clicks work
 
 ### Game Rules
+
 * The game ends if you pot the 8ball illegally, and the player who potted the ball loses the game
 * The game ends if you pot the 8ball legally, and the player who potted the ball wins the game
 * If the player pots a ball of a color, and the groups are not assigned yet, the player who potted the ball is assigned to that group
@@ -789,6 +810,7 @@ These test are do by me playing the game:
 ## Objective Analysis
 
 Here are the objectives set for this project:
+
 * The rules of pool should be implemented in the game
 * The game should run at more than 30 frames per second
 * Physical interactions in the game should be realistic:
@@ -801,13 +823,38 @@ Here are the objectives set for this project:
 * A configuration file, which can change some of the in-game options like ball size or cue hit power
 * An installation guide/README file for users
 
-Collisions, ball movement and game rules were tested in Testing section.
+Collisions, ball movement and game rules were completed and tested in Testing section.
+
+The game frame per second limit was set to 60 fps, and judging from looks, it runs at steady 60 frames per second without visible tearing. The frame per second limit variable can be changed in the configuration file.
+
+Talking about the configuration file, the configuration options are perhaps too extensive and contain stuff you wouldn't expect, for example, you could change the position of the individual pockets in the file. Even though the file is written in python, users won't need to know python to change these settings, because the file looks like a normal text file. This mostly because of pythons high level syntax which is very close to pseudocode.
+
+As mentioned before, the installation guide for Linux and Windows users is included in the README file. Because python has to install the required modules before the game could be played, the installation for windows users requires the command line. For Linux, however, there is a simple shell script which creates a virtual environment, installs the required modules, and starts the game.
 
 
 ## User Feedback
 
+The game became surprisingly popular, gaining traffic on GitHub and, at the time of writing this, becoming the first search result on Google for "python pool game", which is, admittedly, a very specific search query.
+
 ## Possible Extensions
 
-multiplayer, stripe approximations sounds.
+As mentioned in analysis the multiplayer feature for this game is something I would like to implement, but it would to complex for me, because it requires a server to overlook the players actions and to synchronise both player's programs. One similar feature I would like to implement, but lack the resources to do so is an AI player. While it is significantly easier to implement AI than multiplayer, but after looking into this problem I have not found an easy way to do this. One algorithm for AI which caught my attention was this:
+
+1. Find every possible ball on the table you can hit.
+2. Check if any of the balls have a direct unblocked path to a pocket.
+3. Calculate where the point of contact must be made to hit the ball into that pocket.
+4. Calculate the angle of the cue required so that the cue ball would hit the target ball at the correct point of contact.
+
+This is a fairly simple algorithm but there are several problems with it. Firstly, it's not trivial to find the list of balls you can hit, without hitting another ball. One way to do that is - whenever you are checking a particular ball, see if any other balls are in the sector between the cue ball and the ball. That is at least $\mathcal{O}(n^2)$. Same for checking if the ball has an unblocked path to the pocket. Another way to implement this would be machine learning algorithms, but these are famous for requiring high level mathematics knowledge which I lack.
+
+Another design choice which could be improved is the stripe rendering algorithm. The problem with the algorithm is that it is an approximation and can be wrong when looked into very carefully.
+
+![A picture of a rotated ball in-game](figures/ball_screen1.png)
+
+![A picture of balls in-game](figures/ball_screen2.png)
+
+In real life the stripe on the top of the ball would look a bit thicker than on the sides, but it is of constant width in-game. This is because the stripe on the top is slightly closer to the observer and thus takes up a bigger section of their vision. To generate the stripe properly, we would have to consider the change of distance when the ball is rolling.
+
+There also could be cosmetic additions like sounds or custom skins for the balls.
 
 # References

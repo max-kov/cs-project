@@ -1,4 +1,4 @@
-mport pygame
+import pygame
 
 import collisions
 import event
@@ -29,10 +29,8 @@ while not was_closed:
                     events = event.events()
                     if game.cue.is_clicked(events):
                         game.cue.cue_is_active(game, events)
-                    elif game.can_move_white_ball and game.white_ball.is_clicked(
-                            events):
-                        game.white_ball.is_active(game,
-                                                  game.is_behind_line_break())
+                    elif game.can_move_white_ball and game.white_ball.is_clicked(events):
+                        game.white_ball.is_active(game, game.is_behind_line_break())
         was_closed = events["closed"]
 
     if button_pressed == config.exit_button:
