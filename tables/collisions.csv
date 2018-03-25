@@ -1,0 +1,4 @@
+No.,Test description,Expected outcome,Data type
+1.00,Hitting a ball into a pocket,"As soon as the centre of the ball touches the pocket, it should be removed",Typical
+2.00,Hitting a ball into another ball,"Upon hitting the other ball, two balls should collide and recoil from eachother",Typical
+3.00,Hitting a ball into the table wall,"Upon hitting the table wall, the ball should recoil and go in the other direction",Typical

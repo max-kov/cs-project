@@ -1,0 +1,4 @@
+№,Test description,Expected outcome,Data type
+1.00,Hovering over the button to see if the colour changes,The button will change colour,Typical
+2.00,Clicking on a button,The button will trigger a corresponding event,Typical
+3.00,Clicking on the background,Nothing should happen,Typical

@@ -1,8 +1,15 @@
 ---
 title: Computer Science project.
 author: Maksims Kovalovs
+header-includes:
+- \usepackage{fancyhdr}
+- \usepackage{lipsum}
+- \pagestyle{fancy}
+- \fancyhead[CO,CE]{Maksims Kovalovs -insert candidate num here-}
+- \fancyfoot[CO,CE]{Chilwell School 28210}
+- \fancyfoot[LE,RO]{\thepage}
 output:
-    pdf_document:
+    html_document:
         toc: true
         toc_depth: 2
 bibliography: references.bib
@@ -114,7 +121,7 @@ AB=
 $$
 Or
 $$
-ab_{ij}=a_{i1}b_{1j}+\cdots +a_{im}b_{mj}=\sum_{k=1}^{m}a_{ik}b_{kj}
+c_{ij}=a_{i1}b_{1j}+\cdots +a_{im}b_{mj}=\sum_{k=1}^{m}a_{ik}b_{kj}
 $$
 So, for example, if you have a point in 2-dimensional space $\vec k=(1,2)$ which you want to rotate 90 degrees counterclockwise, you compute:
 
@@ -778,28 +785,70 @@ TOTAL                     736    501    32%
 Tests for other builds and instructions on how to run the tests yourself can be found on the GitHub repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on GitHub^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
 
 
+
 ## Conventional Tests
 
+Normally, in this section candidates test their projects and add the proof in the form of screenshots. With my project, however, it is hard to understand what is going on in the game only through screenshots, so I recorded a gameplay video, doing every test outlined in this section.
 These test will be done by me playing the game:
 
 ### GUI
 
-* Buttons light up when you hover over them
-* Buttons work
+```{r echo = FALSE, results = 'asis'}
+library(knitr)
+library(kableExtra)
+library(pander)
+options(knitr.kable.NA = '')
+pander(read.table("tables/gui.csv", header=TRUE, sep=","))
+```
+
+#### Test number 1
+
+Figure 20 and 21 show that the button correctly changes the color of the text upon hovering.
+
+![The menu before hovering over the button](testing/menu1.png)
+
+![The menu while hovering over the button](testing/menu2.png)
+
+#### Tests number 2
+
 
 ### Collisions
 
-* ball-pocket collisions
-* Ball-ball collisions
-* Ball-wall collisions
+```{r echo = FALSE, results = 'asis'}
+pander(read.table("tables/collisions.csv", header=TRUE, sep=","))
+```
 
-### Controls
+#### Test number 1
 
-* Pressing ESC in game will leave to the main menu
+Figures 25 to 28 show several moments of a successful shot on the teal ball, where it is potted. As soon as the teal ball reaches the pocket, it is removed, as it is meant to do.
+
+#### Test number 2
+
+Figures 22 to 24 show the initial break.
+
+I have tested the mathematics of the collisions using unit tests before, but this serves as additional proof that the collisions work.
+
+![Ball break 1/3](testing/break1.png)
+
+![Ball break 2/3](testing/break2.png)
+
+![Ball break 3/3](testing/break3.png)
+
+![Potting the teal ball 1/4](testing/pot1.png)
+
+![Potting the teal ball 2/4](testing/pot2.png)
+
+![Potting the teal ball 3/4](testing/pot3.png)
+
+![Potting the teal ball 4/4](testing/pot4.png)
+
 * The ball cannot be moved outside of the table, or into other balls, when it can be moved
-* Cue clicks work
 
 ### Game Rules
+
+```{r echo = FALSE, results = 'asis'}
+pander(read.table("tables/gui.csv", header=TRUE, sep=","))
+```
 
 * The game ends if you pot the 8ball illegally, and the player who potted the ball loses the game
 * The game ends if you pot the 8ball legally, and the player who potted the ball wins the game
@@ -856,5 +905,6 @@ Another design choice which could be improved is the stripe rendering algorithm.
 In real life the stripe on the top of the ball would look a bit thicker than on the sides, but it is of constant width in-game. This is because the stripe on the top is slightly closer to the observer and thus takes up a bigger section of their vision. To generate the stripe properly, we would have to consider the change of distance when the ball is rolling.
 
 There also could be cosmetic additions like sounds or custom skins for the balls.
+
 
 # References
