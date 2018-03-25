@@ -1,4 +1,7 @@
-№,Test description,Expected outcome,Data type
-1.00,Hovering over the button to see if the colour changes,The button will change colour,Typical
-2.00,Clicking on a button,The button will trigger a corresponding event,Typical
-3.00,Clicking on the background,Nothing should happen,Typical
+Test description,Expected outcome,Proof,Data type,Result
+Pot the 8ball illegally,Player who potted the ball loses the game,Figures 32-34,Typical,*Failed*
+Pot the 8ball legally,Player who potted the ball wins the game,Figures 35-37,Typical,Passes
+"Legally potting a ball, when the groups are not assigned",The player should be assigned to the group he potted,Figures 38-41,Typical,Passes
+Making a hit without hitting any balls,The next player should be able to move the cue ball on his turn,Figures 42-44,Typical,Passes
+Making a hit and hitting only the 8ball ,The next player should be able to move the cue ball on his turn,Figures 45-48,Typical,Passes
+Making a hit and hitting only hitting balls from your opponents group ,The next player should be able to move the cue ball on his turn,Figures 49-52 ,Typical,Passes

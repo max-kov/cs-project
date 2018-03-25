@@ -31,11 +31,11 @@ Most pool games online are hosted on online game websites like www.miniclip.com.
 
 I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  were abandoned or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
 
-There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page (Figure 1) of the projects, some users are having problems installing the software[@githubissue].
+There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page (Figure 2) of the projects, some users are having problems installing the software[@githubissue].
 
 ![People having problems installing the pool game (GitHub issue)](figures/installation_problems.png)
 
-Additionally, looking at commit messages (Figure 2), you can see that the main maintainer was trying, albeit unsuccessfully, to add advertisements to the game, which is a bad idea because ads will make the user experience worse[@githubads].
+Additionally, looking at commit messages (Figure 3), you can see that the main maintainer was trying, albeit unsuccessfully, to add advertisements to the game, which is a bad idea because ads will make the user experience worse[@githubads].
 
 ![GitHub commit message](figures/ads.png)
 
@@ -788,8 +788,10 @@ Tests for other builds and instructions on how to run the tests yourself can be 
 
 ## Conventional Tests
 
-Normally, in this section candidates test their projects and add the proof in the form of screenshots. With my project, however, it is hard to understand what is going on in the game only through screenshots, so I recorded a gameplay video, doing every test outlined in this section.
-These test will be done by me playing the game:
+Normally, in this section candidates test their projects and add the proof in the form of screenshots. With my project, however, it is hard to understand what is going on in the game only through screenshots, so I recorded a gameplay video, doing every test outlined in this section (I will only mention the gameplay video as proof only when screenshots can't be used to show the outcome of the test). The video is hosted on youtube - https://www.youtube.com/watch?v=rg0-kHyMUhQ. 
+
+Other than that, unlike the automatic testing mentioned earlier, these tests will be done by me playing the game.
+
 
 ### GUI
 
@@ -798,35 +800,24 @@ library(knitr)
 library(kableExtra)
 library(pander)
 options(knitr.kable.NA = '')
-pander(read.table("tables/gui.csv", header=TRUE, sep=","))
+pander(read.table("tables/gui.csv", header=TRUE, sep=","), split.table = Inf)
 ```
-
-#### Test number 1
-
-Figure 20 and 21 show that the button correctly changes the color of the text upon hovering.
-
-![The menu before hovering over the button](testing/menu1.png)
-
-![The menu while hovering over the button](testing/menu2.png)
-
-#### Tests number 2
-
 
 ### Collisions
 
 ```{r echo = FALSE, results = 'asis'}
-pander(read.table("tables/collisions.csv", header=TRUE, sep=","))
+pander(read.table("tables/collisions.csv", header=TRUE, sep=","), split.table = Inf)
 ```
 
-#### Test number 1
+### Game Rules
 
-Figures 25 to 28 show several moments of a successful shot on the teal ball, where it is potted. As soon as the teal ball reaches the pocket, it is removed, as it is meant to do.
+```{r echo = FALSE, results = 'asis'}
+pander(read.table("tables/game_rules.csv", header=TRUE, sep=","), split.table = Inf)
+```
 
-#### Test number 2
+![The menu before hovering over the button](testing/menu1.png)
 
-Figures 22 to 24 show the initial break.
-
-I have tested the mathematics of the collisions using unit tests before, but this serves as additional proof that the collisions work.
+![The menu while hovering over the button](testing/menu2.png)
 
 ![Ball break 1/3](testing/break1.png)
 
@@ -842,17 +833,53 @@ I have tested the mathematics of the collisions using unit tests before, but thi
 
 ![Potting the teal ball 4/4](testing/pot4.png)
 
-* The ball cannot be moved outside of the table, or into other balls, when it can be moved
+![Attempting to put the ball into the another ball](testing/ball_movement1.png)
 
-### Game Rules
+![Attempting to put the ball into the wall](testing/ball_movement2.png)
 
-```{r echo = FALSE, results = 'asis'}
-pander(read.table("tables/gui.csv", header=TRUE, sep=","))
-```
+![Attempting to put the ball into the pocket](testing/ball_movement3.png)
 
-* The game ends if you pot the 8ball illegally, and the player who potted the ball loses the game
-* The game ends if you pot the 8ball legally, and the player who potted the ball wins the game
-* If the player pots a ball of a color, and the groups are not assigned yet, the player who potted the ball is assigned to that group
+![Potting the 8ball illegally 1/4](testing/illegal_8ball_pot1.png)
+
+![Potting the 8ball illegally 2/3](testing/illegal_8ball_pot2.png)
+
+![Potting the 8ball illegally 3/3](testing/illegal_8ball_pot3.png)
+
+![Potting the 8ball legally 1/3](testing/legal_8ball_pot1.png)
+
+![Potting the 8ball legally 2/3](testing/legal_8ball_pot2.png)
+
+![Potting the 8ball legally 3/3](testing/legal_8ball_pot3.png)
+
+![Potting a ball before the groups have been assigned 1/4](testing/legal_pot1.png)
+
+![Potting a ball before the groups have been assigned 2/4](testing/legal_pot2.png)
+
+![Potting a ball before the groups have been assigned 3/4](testing/legal_pot3.png)
+
+![Potting a ball before the groups have been assigned 4/4](testing/legal_pot4.png)
+
+![Not hitting a single ball in a turn 1/3](testing/nohit_shot1.png)
+
+![Not hitting a single ball in a turn 2/3](testing/nohit_shot2.png)
+
+![Not hitting a single ball in a turn 3/3](testing/nohit_shot3.png)
+
+![Hitting the 8ball 1/4](testing/8ball_hit1.png)
+
+![Hitting the 8ball 2/4](testing/8ball_hit2.png)
+
+![Hitting the 8ball 3/4](testing/8ball_hit3.png)
+
+![Hitting the 8ball 4/4](testing/8ball_hit4.png)
+
+![Hitting a ball from the opposite group 1/4](testing/opposite_group_hit1.png)
+
+![Hitting a ball from the opposite group 2/4](testing/opposite_group_hit2.png)
+
+![Hitting a ball from the opposite group 3/4](testing/opposite_group_hit3.png)
+
+![Hitting a ball from the opposite group 4/4](testing/opposite_group_hit4.png)
 
 # Evaluation
 
@@ -884,6 +911,8 @@ As mentioned before, the installation guide for Linux and Windows users is inclu
 ## User Feedback
 
 The game became surprisingly popular, gaining traffic on GitHub and, at the time of writing this, becoming the first search result on Google for "python pool game", which is, admittedly, a very specific search query.
+
+![Github repository traffic report](figures/github_traffic.png)
 
 ## Possible Extensions
 
