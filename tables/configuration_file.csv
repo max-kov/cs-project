@@ -1,0 +1,7 @@
+Test description,Expected outcome,Proof,Data type,Result
+Decreasing the value of cue_length,The length of the cue should decrease ,"Figures 53,54",Typical,Passes
+Increasing the value of ball_radius,The size of the balls should increase,"Figures 53,55",Typical,Passes
+Changing the value of resolution,The size of the game window should change ,"Figures 53,56",Typical,Passes
+Increasing the value of hole_radius,The size of the pockets should increase,"Figures 53,57",Typical,Passes
+Decrease the friction_coeff,Balls should lose their speed faster ,Second gameplay video,Typical,Passes
+Set friction_coeff to zero,The balls should experience no friction,Second gameplay video,Extreme,Passes

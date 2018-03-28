@@ -185,7 +185,8 @@ class BallSprite(pygame.sprite.Sprite):
                     config.table_margin + config.ball_radius + config.hole_radius,
                     events["mouse_pos"])) and \
                     np.all(np.greater(
-                        config.resolution - config.table_margin - config.ball_radius - config.hole_radius,
+                        config.resolution - config.table_margin - config.ball_radius\
+                        - config.hole_radius,
                         events["mouse_pos"])) and \
                     not collisions.check_if_ball_touches_balls(
                         events["mouse_pos"], self.number, game_state.balls):

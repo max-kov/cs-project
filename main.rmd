@@ -9,13 +9,21 @@ header-includes:
 - \fancyfoot[CO,CE]{Chilwell School 28210}
 - \fancyfoot[LE,RO]{\thepage}
 output:
-    html_document:
+    pdf_document:
         toc: true
         toc_depth: 2
 bibliography: references.bib
 link-citations: yes
 csl: refstyle.csl
 ---
+
+
+```{r echo = FALSE, results = 'asis'}
+library(knitr)
+library(kableExtra)
+library(pander)
+options(knitr.kable.NA = '')
+```
 
 # Analysis
 
@@ -519,7 +527,7 @@ return rect_area >= sum(triangle_areas)
 
 As seen in analysis, GitHub users had problems installing other games like this. I will add instructions for installing the game for Windows and Linux in the README file of the game.
 
-I will also make a simple shell script for Linux which will create a virtual environment and install every dependency through PIP.
+I will also make a simple shell script for Linux which will create a virtual environment and install every dependency through PIP. The script will create a virtual environment using the venv module and install the necessary python modules in the game folder. The virtual environment is needed so that the needed python libraries would not be installed system-wide, which means that when the user deletes the game folder, the installed libraries will be deleted too, not leaving unnecessary libraries on the user's computer. Additionally, this will prevent some bugs due to different version of the library installed on the user's computer. For example, if the user has version 1 of the numpy library, but my program was developed using numpy version 2, we would have to either install version 2 numpy on the user's computer or use already installed version 1 numpy which could cause errors.
 
 ## Game Objects and Classes
 
@@ -543,7 +551,7 @@ Disclaimer: the rotation_matrix function in physics.py was taken from https://st
 
 To be more productive and avoid code loss situations, I decided to use version control. Specifically git, which is the most popular version control framework [@versioncontrol]. Storing a git repository exclusively on a local machine is dangerous since in case of a disk failure all data is lost. To ensure this never occurs, I regularly uploaded my code to github, which is a cloud service which allows storing git repositories on their server. For complex mathematical operations, I used numpy, a numerical library for python which in addition to a wide range of scalar functions provides a multitude of vector functions. For executing tests I used pytest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to github. For this I used the Travis CI service. Finally, for managing dependencies I chose pip (all project requirements are specified in requirements.txt), which is a common dependency manager used for python.
 
-## Bugs Fixed During the Development of the Program
+## Bugs Fixed During Development
 
 ### "Reverse" Shot Bug
 
@@ -678,19 +686,103 @@ cat pool/event.py
 cat pool/config.py
 ```
 
+## README.md
+
+This file is written in Markdown for aesthetical reasons, I am going to copy the text version of the file without the formatting. To view the Markdown version, please visit - `https://github.com/max-kov/pool/blob/master/README.md`
+
+
+```
+Pool
+
+A pool game written entirely in python!
+
+Features
+
+Realistic collisions based on a two-dimensional Newtonian model.
+Simple configuration file (config.py) with many changeable options like ball size,
+ball colour, cue length/thickness and many more.
+Algorithms which render ball sprites using rotation matrices.
+Tests for collision functions and other math related functions.
+A small and configurable game menu.
+
+Installing
+Dependencies
+
+The pool game requires python 3.5 with modules which are listed in requirements.txt .
+Installing on debian-based linux distributions
+
+Install python 3.5 with pip, venv and pygame dependencies
+
+sudo apt-get build-dep python-pygame
+sudo apt-get install python-dev python3 python3-pip python3-venv
+
+Then, clone the github code and run the game using run.sh, which will setup a virtual
+python environment with the aforementioned modules.
+
+git clone git://github.com/max-kov/pool.git
+cd pool
+./run.sh
+
+If the pygame installation fails, it's most likely due to apt not having any URIs in
+sources.list file. To fix execute
+
+sudo sed -i -- 's/#deb-src/deb-src/g' /etc/apt/sources.list && sudo sed -i -- 's/#
+deb-src/deb-src/g' /etc/apt/sources.list
+sudo apt-get update
+
+and run the installation procedure again.
+Windows
+
+Download python 3.5 with pip then add python to the path variable and run
+
+python -m pip install -r requirements.txt
+
+in the administrator cmd in the game folder to install the dependencies. Finally,
+start main.py to run the game. You might have to use python3 instead of python
+depending if you have python2 installed. To check that you are using the right
+vesrion, write python in the console to see what version is used.
+Running the tests
+
+You can always see the results of the latest build here. If you want to run the
+tests yourself, we will need extra modules. (On linux) Run
+
+pip3 install -r test_requirements.txt
+
+in the game folder to install the testing modules. To run the tests write
+
+PYTHONPATH=./pool pytest tests/
+
+You can also check test coverage by executing
+
+PYTHONPATH=./pool pytest --cov=. tests/
+
+That will analyse which files and which lines of code were executed by the tests.
+.coveragerc will prevent the module from analysing test files as well.
+Built With
+
+Python 3.5
+Pygame - 2d graphics library
+Numpy - Scientific computing library, used here for vector opertations
+Travis CI and CodeClimate - Testing and code analysis
+```
+
 # Testing
 
 ## Unit Testing
-In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which, when executed, runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing, because I am testing specific functions of the program.
-To make the job of testing the game with every change easier, I have made unit tests which are executed on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”, the tests contain some input, which is used with the functions of the game which are responsible for a specific task. Lets look at a particular example:
+In my game there are two main things to test - the process of the physical simulation, meaning the mathematics behind the collisions, collision detection and others, and the user interface. To test the mathematics, I've made a set of tests in a form of a script, which when executed runs the main program with the test input data. These tests are considered white box testing, more specifically, unit testing because I am testing specific functions of the program.
+
+To make the job of testing the game with every change easier, I am using a continuous integration servive (TravisCI) which executes the unit tests on my code every time I make a commit to GitHub. The unit tests are included with the game in the folder “tests”.
+
+The tests work by executing a function from the pool game with a specific input and then comparing the result of the computation to a set value which is known to be correct.
 
 ```
 def test_point_distance1(self):
     assert physics.point_distance(np.array([0, 0]), np.array([3, 4])) == 5
 ```
 
-This function tests the function responsible for calculating the distance between two points. The function uses the function to calculate the distance between points (0,0) and (3,4), and compares it to 5. If the function does not return 5, the test returns an exception.
-Here is another, more complicated example of an edge case test:
+The test calls the function responsible for calculating the distance between two points, with points (0,0) and (3,4), and compares it to 5. If the function does not return 5, the test returns an exception because the function did not return the right value.
+
+Here is another, more complicated example of an edge case test (Figure 18):
 
 ```
 def test_movement4(self):
@@ -700,11 +792,11 @@ def test_movement4(self):
     assert not physics.ball_collision_check(ball1, ball2)
 ```
 
-![test 1](figures/test1.png)
+![Edge case collision test](figures/test1.png)
 
-The test sets the balls such that they are touching, however, both balls are moving with the same velocity. That means there is no collision.
+The test sets the balls such that they are touching, however, both balls are moving with the same velocity. That means there is collision, but there is no need for it to be resolved (explained in Technical Solution - Bugs Fixed During Development).
 
-This is an example of an extreme test:
+This is an example of an extreme test (Figure 19):
 
 ```
 def test_movement10(self):
@@ -718,11 +810,15 @@ The values in the test are exaggerated so that we know that the game can handle 
 
 ![test2](figures/test2.png)
 
-For executing tests I used PyTest, a popular python unit-testing library. I set up a simple continuous integration pipeline which runs all of my tests on a git-push to GitHub. For this I used the Travis CI service.
 
-### How To Run the Tests
+### Test files
 
-The file contains many tests, including matrix transformation, line to ball collision and the triangle area tests. Here are the test files:
+
+```{r echo = FALSE, results = 'asis'}
+pander(read.table("tables/test_files.csv", header=TRUE, sep=","), split.table = Inf)
+```
+
+Here are the test files:
 
 #### test_ball_line_collision.py
 ```{r engine='bash', comment='', echo=F}
@@ -749,61 +845,50 @@ cat tests/test_rotation_matrix.py
 cat tests/test_triangle_area.py
 ```
 
-Here is me running the tests on my machine on the latest pool build.
+### How To Run the Tests
+
+To run the tests on Linux, run `PYTHONPATH=./pool pytest tests/` in the terminal in the game folder. Here is me running the tests on my machine on the latest pool build.
 
 ```
-PYTHONPATH=./pool py.test --cov=.
 ========================= test session starts ==========================
 platform linux -- Python 3.6.4, pytest-3.2.3, py-1.5.2, pluggy-0.4.0
 rootdir: /home/max/code/python/pool, inifile:
 plugins: cov-2.5.1, asyncio-0.8.0
-collected 31 items
+collected 30 items                                                      
 
-tests/test_physics.py ...............................
+tests/test_ball_ball_collision.py .................
+tests/test_ball_line_collision.py ......
+tests/test_distance.py ...
+tests/test_rotation_matrix.py ..
+tests/test_triangle_area.py ..
 
------------ coverage: platform linux, python 3.6.4-final-0 -----------
-Name                    Stmts   Miss  Cover
--------------------------------------------
-pool/__init__.py            0      0   100%
-pool/ball.py              120     84    30%
-pool/collisions.py         26     18    31%
-pool/config.py             61      5    92%
-pool/cue.py               100     80    20%
-pool/event.py              18     12    33%
-pool/gamestate.py         210    170    19%
-pool/graphics.py           49     38    22%
-pool/main.py               31     31     0%
-pool/physics.py            44      7    84%
-pool/table_sprites.py      77     56    27%
--------------------------------------------
-TOTAL                     736    501    32%
-
-
-====================== 31 passed in 0.39 seconds =======================
+====================== 30 passed in 0.21 seconds =======================
 ```
 
-Tests for other builds and instructions on how to run the tests yourself can be found on the GitHub repository page^[https://github.com/max-kov/pool]. The records of how the build passes the tests are available on GitHub^[https://github.com/max-kov/pool/commits/master] or on Travis-ci^[https://travis-ci.org/max-kov/pool/builds].
+Tests for other builds on the GitHub repository page [@githubrepo]. The records of how the build passes the tests are available on the GitHub commit history page^[https://github.com/max-kov/pool/commits/master] or on Travis-CI^[https://travis-ci.org/max-kov/pool/builds].
 
 
 
 ## Conventional Tests
 
-Normally, in this section candidates test their projects and add the proof in the form of screenshots. With my project, however, it is hard to understand what is going on in the game only through screenshots, so I recorded a gameplay video, doing every test outlined in this section (I will only mention the gameplay video as proof only when screenshots can't be used to show the outcome of the test). The video is hosted on youtube - https://www.youtube.com/watch?v=rg0-kHyMUhQ. 
+Unlike the automatic unit testing mentioned earlier, these tests will be done by me playing the game.
 
-Other than that, unlike the automatic testing mentioned earlier, these tests will be done by me playing the game.
+Normally, in this section candidates test their projects and add the proof in the form of screenshots. With my project, however, it is hard to understand what is going on in the game only through screenshots, so I recorded a gameplay video, doing every test outlined in GUI, Collisions and Game rules sections (I will only mention the gameplay video as proof only when screenshots can't be used to show the outcome of the test). The video is hosted on youtube - `https://www.youtube.com/watch?v=rg0-kHyMUhQ`.
+
+The proof for the last 2 tests in the Configuration File section references the second gameplay video - `https://www.youtube.com/watch?v=RlY_nydxog0`.
 
 
 ### GUI
 
+In this section I will be testing the graphical user interface component of the game and the possible interactions the user might have with it.
+
 ```{r echo = FALSE, results = 'asis'}
-library(knitr)
-library(kableExtra)
-library(pander)
-options(knitr.kable.NA = '')
 pander(read.table("tables/gui.csv", header=TRUE, sep=","), split.table = Inf)
 ```
 
 ### Collisions
+
+Collisions were thoroughly tested using automated unit tests, but just to be sure, I will check what they look like in game.
 
 ```{r echo = FALSE, results = 'asis'}
 pander(read.table("tables/collisions.csv", header=TRUE, sep=","), split.table = Inf)
@@ -811,8 +896,56 @@ pander(read.table("tables/collisions.csv", header=TRUE, sep=","), split.table = 
 
 ### Game Rules
 
+This is the section concerning the rules of the game.
+
 ```{r echo = FALSE, results = 'asis'}
 pander(read.table("tables/game_rules.csv", header=TRUE, sep=","), split.table = Inf)
+```
+
+#### "Winning by illegally potting the 8ball" bug fix
+
+The 1st test in the table failed, meaning if a player potted the 8ball illegally, he won the game instead of loosing it.
+
+Fortunately, the bug was a simple mistype in one of the if statements which decided who won the game. Here is the piece of code responsible for the bug.
+
+```
+def check_potted(self):
+    self.can_move_white_ball = False  # if white ball is potted, it will be created again and placed in the middle
+    if 0 in self.potted:
+        self.create_white_ball()
+        self.cue.target_ball = self.white_ball
+        self.potted.remove(0)
+        self.turn_over(True)
+    if 8 in self.potted:
+        if self.potting_8ball[self.current_player]:
+            self.game_over(self.current_player == Player.Player1)
+        else:
+            self.game_over(self.current_player == Player.Player1)
+```
+
+`Check_potted` is the function which checks the potted balls after the round is over. If the game finds the 8 ball in the potted balls list, it checks if the current player (who potted the 8ball) has the right to do so and calls the `game_over` function. The function `game_over` receives one boolean parameter - `p1_won`, which indicates whether the first player won the game (we can deduce that if the first player did not win the game, the second player must have won the game, so only one boolean parameter is needed). If the current player had the right to pot the 8 ball the `game_over` function is executed with `self.current_player==Player.Player1`. It passes that boolean because the current player won the game, so if the 1st player potted the 8ball the function would be executed with a `True` and is the 2nd player potted the 8ball the function would be executed with a `False`.
+
+The bug, hovewer, lies in the `else` clause. If the current player did not have the right to pot the 8 ball, the `game_over` function is still executed with the same parameter, meaning the player who potted the 8 ball wins the game, even if the action was illegal. To fix the bug, we have to change the "equal to" operator to "not equal to".
+
+Changed code:
+```
+def check_potted(self):
+    ...
+    if 8 in self.potted:
+        if self.potting_8ball[self.current_player]:
+            #current player wins
+            self.game_over(self.current_player == Player.Player1)
+        else:
+            #current player loses
+            self.game_over(self.current_player != Player.Player1)
+```
+
+#### Configuration file
+
+In this section I will test the configuration file `config.py` by changing the corresponding values in the file.
+
+```{r echo = FALSE, results = 'asis'}
+pander(read.table("tables/configuration_file.csv", header=TRUE, sep=","), split.table = Inf)
 ```
 
 ![The menu before hovering over the button](testing/menu1.png)
@@ -881,6 +1014,16 @@ pander(read.table("tables/game_rules.csv", header=TRUE, sep=","), split.table = 
 
 ![Hitting a ball from the opposite group 4/4](testing/opposite_group_hit4.png)
 
+![Initial state of the first screen of the game](testing/initial_screen.png)
+
+![Decreased cue_length variable in the configuration file](testing/config_cue.png)
+
+![Increased ball_radius variable in the configuration file](testing/config_balls.png)
+
+![Changed resolution variable in the configuration file](testing/config_resolution.png)
+
+![Increased hole_radius variable in the configuration file](testing/config_pockets.png)
+
 # Evaluation
 
 ## Objective Analysis
@@ -899,18 +1042,38 @@ Here are the objectives set for this project:
 * A configuration file, which can change some of the in-game options like ball size or cue hit power
 * An installation guide/README file for users
 
-Collisions, ball movement and game rules were completed and tested in Testing section.
+Collisions, ball movement and game rules were completed and tested in Testing section[@vid1][@vid2].
 
-The game frame per second limit was set to 60 fps, and judging from looks, it runs at steady 60 frames per second without visible tearing. The frame per second limit variable can be changed in the configuration file.
+The hardest part of the animations in the game was the ball. The stripes on the ball are rendered approximately, meaning the algorithm does not use a large amount of polygons to model the stripe, but because the balls are small in game, this is hardly noticeable[@vid1]. This condition was met.
 
-Talking about the configuration file, the configuration options are perhaps too extensive and contain stuff you wouldn't expect, for example, you could change the position of the individual pockets in the file. Even though the file is written in python, users won't need to know python to change these settings, because the file looks like a normal text file. This mostly because of pythons high level syntax which is very close to pseudocode.
+The game frame per second limit was set to 60 fps, and judging from looks, it runs at steady 60 frames per second without visible tearing. The frame per second limit variable can be changed in the configuration file[@vid1]. This condition was met.
 
-As mentioned before, the installation guide for Linux and Windows users is included in the README file. Because python has to install the required modules before the game could be played, the installation for windows users requires the command line. For Linux, however, there is a simple shell script which creates a virtual environment, installs the required modules, and starts the game.
+Talking about the configuration file, the configuration options are perhaps too extensive and contain stuff you wouldn't expect, for example, you could change the position of the individual pockets in the file. Even though the file is written in python, users won't need to know python to change these settings, because the file looks like a normal text file. This mostly because of pythons high level syntax which is very close to pseudocode[@vid2]. The configuration condition was met.
+
+The installation guide for Linux and Windows users is included in the README file. Because python has to install the required modules before the game could be played, the installation for windows users requires the command line. For Linux, however, there is a simple shell script which creates a virtual environment, installs the required modules, and starts the game.This condition was met.
+
+Therefore, all objectives were met.
 
 
 ## User Feedback
 
-The game became surprisingly popular, gaining traffic on GitHub and, at the time of writing this, becoming the first search result on Google for "python pool game", which is, admittedly, a very specific search query.
+I have interviewed my classmate again after he installed and played the game on his machine.
+
+__Was the game easy to install?__
+
+_Installing the game using the included shell script was as easy as it gets._
+
+__How was your gameplay experience?__
+
+_It wasn't the most graphically pleasing game I've seen in my life but not that it should have been. The game is has simple and appealing graphics. The collisions and the rules work well. I've had a lot of fun changing the values in the configuration file too see how the game would behave._
+
+__Did you encounter any bugs or errors?__
+
+_Not in the normal play mode, no. After changing some of the values in the configuration file the game became unplayable, for example, I made the balls bigger than the pockets and removed movement friction once, and the game did not handle that very well, however I was breaking it intentionally and it's more entertaining if the game allows you to break it. The game ran very smoothly, too._
+
+As expected, the user is satisfied with the solution. One thing to consider, is the fact that the user was using a Linux operating system, which made the process of installing the game easier. The installation process might be more inconvenient on other operating systems.
+
+Besides the interview, the game became surprisingly popular online, gaining traffic on GitHub (see Figure 58) and, at the time of writing this, becoming the first search result on Google for "python pool game", which is, admittedly, a very specific search query.
 
 ![Github repository traffic report](figures/github_traffic.png)
 
@@ -931,9 +1094,8 @@ Another design choice which could be improved is the stripe rendering algorithm.
 
 ![A picture of balls in-game](figures/ball_screen2.png)
 
-In real life the stripe on the top of the ball would look a bit thicker than on the sides, but it is of constant width in-game. This is because the stripe on the top is slightly closer to the observer and thus takes up a bigger section of their vision. To generate the stripe properly, we would have to consider the change of distance when the ball is rolling.
+In real life the stripe on the top of the ball would look a bit thicker than on the sides (see Figure 59), but it is of constant width in-game. This is because the stripe on the top is slightly closer to the observer and thus takes up a bigger section of their vision. To generate the stripe properly, I would have to consider the change of distance when the ball is rolling. Also, and perhaps more noticeably, the game doesn't use polygons to model the stripes, which makes the line look a bit rough on the edges (Figure 60).
 
-There also could be cosmetic additions like sounds or custom skins for the balls.
-
+Finally, as seen in the User Feedback section of this chapter, the user had no problems installing the game, however that is mostly because the user was using a Linux-based operating system. The installation for Windows users is harder because they have to install the libraries themselves. The installation aspect may be improved by making a special Windows game installer which would allow the game to be installed without (or minimal) user interaction.
 
 # References

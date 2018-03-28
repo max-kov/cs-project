@@ -1,5 +1,5 @@
 Test description,Expected outcome,Proof,Data type,Result
 Hovering over the button,The button will change colour,Figure 20-21,Typical,Passes
 Retracting the cue stick and releasing,The cue ball will move,Figure 22-23,Typical,Passes
-Retracting the cue stick then bringing it back to the initial position,The cue ball will not move,Gameplay video,Typical,Passes
-Moving the ball into other game objects before other objects,The ball should stop,Figures 29-31,Erroneous,Passes
+Retracting the cue stick then bringing it back to the initial position and then releasing,The cue ball will not move,Gameplay video,Typical,Passes
+Placing the ball into other balls or other game objects,The ball should stop before the game object,Figures 29-31,Erroneous,Passes
