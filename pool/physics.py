@@ -6,6 +6,7 @@ import config
 
 
 def point_distance(p1, p2):
+    # pythagorean distance
     dist_diff = p1 - p2
     return np.hypot(*dist_diff)
 
@@ -31,7 +32,7 @@ def collide_balls(ball1, ball2):
     dist = point_distance(ball1.pos, ball2.pos)
     # normalising circle distance difference vector
     collision = point_diff / dist
-    # projecting balls velocity ONTO difference vector
+    # using the dot product to project balls velocity ONTO difference vector
     ball1_dot = np.dot(ball1.velocity, collision)
     ball2_dot = np.dot(ball2.velocity, collision)
     # since the masses of the balls are the same, the velocity will just switch
@@ -89,7 +90,7 @@ def line_ball_collision_check(line, ball):
         # than the balls radius and finally checking if
         # the ball is moving towards the line with the dot product
         return -config.ball_radius / 3 <= projected_distance <= \
-           np.hypot(*(displacement_to_second_point)) + config.ball_radius / 3 
+           np.hypot(*(displacement_to_second_point)) + config.ball_radius / 3 \
            and np.hypot(*(closest_line_point - ball.pos + line.line[0])) <= \
            config.ball_radius and np.dot(perpendicular_vector, ball.velocity) <= 0
 
@@ -100,6 +101,7 @@ def collide_line_ball(line, ball):
                                    np.hypot(*(displacement_to_second_point))
     perpendicular_vector = np.array(
         [-normalised_point_diff_vector[1], normalised_point_diff_vector[0]])
+    # using dot product to get the perpendicular component of the velocity
     ball.velocity -= 2 * np.dot(perpendicular_vector, ball.velocity) * \
                      perpendicular_vector * 0.5 * (
                                  1 + config.table_coeff_of_restitution)

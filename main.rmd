@@ -2,15 +2,20 @@
 title: Computer Science project.
 author: Maksims Kovalovs
 header-includes:
+- \usepackage{epstopdf}
 - \usepackage{fancyhdr}
+- \usepackage{graphicx}
 - \usepackage{lipsum}
+- \graphicspath{ {figures/}{testing/} }
 - \pagestyle{fancy}
 - \fancyhead[CO,CE]{Maksims Kovalovs -insert candidate num here-}
 - \fancyfoot[CO,CE]{Chilwell School 28210}
 - \fancyfoot[LE,RO]{\thepage}
 output:
-    pdf_document:
+    html_document:
+        theme: journal
         toc: true
+        toc_float: true
         toc_depth: 2
 bibliography: references.bib
 link-citations: yes
@@ -29,29 +34,34 @@ options(knitr.kable.NA = '')
 
 ## Introduction
 
- Even though the video game industry didn't exist 4 decades ago, it is now one of the most popular hobbies of youth. With new variations idea like mobile games and virtual reality games, it is likely that these games are here to stay for a long time. This project is about making an 8 ball pool game with a top down view that can be played by 2 players on the same computer.
+Even though the video game industry didn't exist 4 decades ago, video games now are one of the most popular hobbies of youth. With new variations on the idea like mobile and virtual reality games, it is likely that these games are here to stay for a long time.
+
+This project is about making an 8 ball pool game with a top down view that can be played by 2 players on the same computer. The main problem this project will have to solve is the rendering of game objects, e.g. rolling balls, and the physical interactions between these objects, e.g. ball collisions.
 
 ## Existing Solutions
 
-Most pool games online are hosted on online game websites like www.miniclip.com. At the time of writing this, the 8 ball pool game is the top game on the website and google says that the game was reviewed 1,563,388 times (Figure 1). This shows that there is a market for these types of games. The problem is, online websites don't provide the source code for their games which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
+Most pool games online are hosted online game websites like www.miniclip.com. At the time of writing this, the 8 ball pool game is the top game on the website and google says that the game was reviewed 1,563,388 times (Figure 1). This shows that there is a market for these types of games. The problem is, online websites don't provide the source code for their games which means that the users cannot learn about how the physics of the game work, but also the users won't be able to customize the game options like ball size or color.
 
-![The first result of Google search of "pool game"](figures/miniclip_reviews.png)
+\begin{figure}[tph!]
+\centerline{\includegraphics[totalheight=6cm]{miniclip_reviews.png}}
+\caption{First result when searching for "pool game" in Google}
+\end{figure}
 
-I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  were abandoned or unfinished [@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
+I've looked on GitHub for pool games and there were some projects like mine, but most of the projects  were abandoned or unfinished[@githubpool1]. For example, the user raysmith619 has a similar repository. In his README file he says that the game is missing the pockets, friction and ball rotation animations. I see these things as very important to the game and will implement them.
 
 There is a big pool game project written in Ruby on Rails[@githubpool2]. The project is finished however, there are different problems with this project. Looking at the issues page (Figure 2) of the projects, some users are having problems installing the software[@githubissue].
 
-![People having problems installing the pool game (GitHub issue)](figures/installation_problems.png)
+Additionally, looking at commit messages (Figure 3), you can see that the main maintainer was trying, albeit unsuccessfully, to add advertisements to the game[@githubads] and online pool games are often monetized with advertisements in the website page. My game will not contain any sort of advertisement because I believe that they will take away from the user experience.
 
-Additionally, looking at commit messages (Figure 3), you can see that the main maintainer was trying, albeit unsuccessfully, to add advertisements to the game, which is a bad idea because ads will make the user experience worse[@githubads].
+![People having problems installing the pool game (GitHub issue)](figures/installation_problems.png)
 
 ![GitHub commit message](figures/ads.png)
 
-To summarise, my game should have parts the mentioned games didn't have - pockets, friction and ball rotation animations. The game should come with an instruction of how to install the game, so that users could acquire the game easily. Also, there should be a configuration file, so that some properties of the game objects could be changed, e.g. ball size or ball colour.
+To summarise, my game should have parts the mentioned games don't have - pockets, friction and ball rotation animations. The game should come with an instruction of how to install the game, so that users could acquire the game easily. Also, there should be a configuration file, so that some properties of the game objects could be changed, e.g. ball size or ball colour.
 
 ## Evidence of Analysis
 
-To get more insight to the problem I had to solve and to understand which features I had to implement, I decided to interview one of my sixth form classmates about it:
+To get more insight to the problem I had to solve and understand which features I had to implement. I decided to interview one of my sixth form classmates about it:
 
 __What are the problems with the current system?__
 
@@ -63,9 +73,9 @@ _We have found some pool games online, but most of them are player vs AI and req
 
 __Is there anything specific you want in the game?__
 
-_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a sandbox or something which allows the user to tweak with the game options like the initial position of the balls._
+_A normal pool game with rules for 2 players should suffice. It shouldn't be too slow or lag. Obviously, the balls and their movement should look like in real life. It would be interesting to have a level editor or something which allows the user to tweak the game options like the initial position of the balls._
 
-The user asked for standard features for this type of game, except for the sandbox mode. That can be achieved in different ways, like an in-game GUI or a configuration file, which is present in many new games.
+The user asked for standard features for this type of game, except for the level editor. That can be achieved in different ways, like an in-game editor GUI or a configuration file, which is present in many new games.
 
 ## Identification of End Users
 
@@ -73,7 +83,7 @@ The main end users of this project are my school friends who are interested in p
 
 ## Proposed Solution
 
-The aim of the project is to build a pool game. Looking at other games online, it would be wise to add a user interface, however there aren't a lot of features which complement a user interface (like save games or in-game soundtrack), so the user interface could be minimal. The user interface will include a main menu and in-game game state trackers (things like current player labels). The collisions and friction will be will have physical models (outlined later in this section). The game will be played on a single computer, with players taking turns to make their move.  Finally, the user interview revealed a need for some sort of configuration option in the game. I think the best way to achieve that would be a configuration file, which is a text file with all of the constant variables in it. That way, if the user wants to change the color of a particular ball, they would be able to do it by changing a variable in the configuration file. This method is easy to implement and provides the highest level of customization possible.
+The aim of the project is to build a pool game. Looking at other games online, it would be wise to add a main menu, however the game doesn't have any features that would complement the main menu, e.g. multiplayer, so the main menu could be minimal and small. The main menu might be useful if I decide to add an options menu or something else which requires a separate screen. The user interface will also include in-game state trackers, for example, there will be a current player label, which indicates which player's turn it is. The collisions and friction will have physical models (outlined later in this section). The game will be played on a single computer, with players taking turns to make their move.  Finally, the user interview revealed a need for some sort of configuration option in the game. I think the best way to achieve that would be a configuration file, which is a text file with all of the constants in it. That way, if the user wants to change the color of a particular ball, they would be able to do it by changing a variable in the configuration file. This method is easy to implement and provides the highest level of customization possible.
 
 This project will deal with 3d rendering, physical simulation and game development areas of computer science. Therefore, I researched some of the relevant techniques game developers use to create games.
 
@@ -172,8 +182,8 @@ Finally, a game development library will be at the core of my project so it is i
 * Physical interactions in the game should be realistic:
   * The movement of the balls should be affected by friction
   * The ball collisions should be inelastic
-  * The game should detect and resolve ball-ball and ball-table side collisions
-* Game animations look realistic:
+  * The game should detect and resolve ball-ball and ball-table side collisions correctly
+* Game animations should look realistic:
   * The balls should visibly rotate when moving
   * The cue should move towards the ball when a player is hitting a ball
 * A configuration file, which can change some of the in-game options like ball size or cue hit power
@@ -181,7 +191,7 @@ Finally, a game development library will be at the core of my project so it is i
 
 ## Acceptable Limitations
 
-After researching the multiplayer feature, I think it will be unfeasible for me to implement it alone. Implementing multiplayer will require good theoretical knowledge of networking and sockets, but the main problem is that adding multiplayer will add a lot of validation problems between clients. Additionally, this feature would most likely require a server, which I don't have.
+The fact that the balls have be modeled as 3d objects makes the rendering problem challenging. The balls can be rendered using different techniques. So, as a result, I might use simplified rendering algorithms, which look acceptable, but not perfect. For example, the rendering algorithm will not render reflections on the balls surface, because that would be too complicated to implement without a game engine and would not add much to the user's experience. On the contrary, features like the reflective ball surfaces may make the gameplay experience worse by using a lot of computer resources and thus slowing down the game.
 
 # Documented Design
 
@@ -202,7 +212,7 @@ In-game interface will consist of the cue, which can be aimed and retracted back
 * An indicator of which group of balls the players need to pot to win the game
 * An indicator of whether the current player can move the cue ball
 
-![ingame GUI design](figures/ui_example1.png)
+![in-game GUI sketch](figures/ui_example1.png)
 
 ### Modular Design
 
@@ -551,6 +561,8 @@ Disclaimer: the rotation_matrix function in physics.py was taken from https://st
 
 To be more productive and avoid code loss situations, I decided to use version control. Specifically git, which is the most popular version control framework [@versioncontrol]. Storing a git repository exclusively on a local machine is dangerous since in case of a disk failure all data is lost. To ensure this never occurs, I regularly uploaded my code to github, which is a cloud service which allows storing git repositories on their server. For complex mathematical operations, I used numpy, a numerical library for python which in addition to a wide range of scalar functions provides a multitude of vector functions. For executing tests I used pytest, a popular python unit-testing library. I also set up a simple continuous integration pipeline which runs all of my tests on a git-push to github. For this I used the Travis CI service. Finally, for managing dependencies I chose pip (all project requirements are specified in requirements.txt), which is a common dependency manager used for python.
 
+To make the projects code easier to read, the code will be split into different files. In general, each file (or module) will have a single class or a single game object associated with them. Each such module could be later imported in other files.
+
 ## Bugs Fixed During Development
 
 ### "Reverse" Shot Bug
@@ -595,11 +607,11 @@ Because the collision is inelastic the balls will lose some kinetic energy, ther
 
 ![one frame after the collision](figures/ball_overlap3.png)
 
-After colliding and moving once (one frame) they balls can still be inside each other, and thus the collision detection algorithm will trigger in the next frame again. If collision resolution algorithm is called on balls which are moving in opposite directions, the vectors will be reversed, and on the next frame the balls will be moving towards each other, making the process repeat indefinitely, which in turn makes the balls stick.
+After colliding and moving once (one frame) the balls can still overlap, and thus the collision detection algorithm will trigger in the next frame again. If collision resolution algorithm is called on balls which are moving away from each other, the vectors will be reversed, and on the next frame the balls will be moving towards each other, making the process repeat indefinitely, which in turn makes the balls stick.
 
 ![vectors with dot product](figures/ball_collision3.png)
 
-To resolve the collision properly we will take the dot product of the difference between the centres of 2 balls (labeled _distance diff_ on figure 21) and the velocity difference vector (labeled as _v1-v2_). If the result is positive that means that the balls are moving towards each other and we can collide them, otherwise we ignore them.
+To resolve the collision properly we will take the dot product of the difference between the centres of 2 balls (labeled _distance diff_ on figure 21) and the velocity difference vector (labeled as _v1-v2_). If the result is positive that means that the balls are moving towards each other and we need to reverse their velocities, otherwise we keep the velocities as they are.
 
 __Code changed__:
 
@@ -632,17 +644,17 @@ def ball_collision_check(ball1, ball2):
 cat pool/main.py
 ```
 
+## physics.py
+
+```{r engine='bash', comment='', echo=F}
+cat pool/physics.py
+```
 ## gamestate.py
 
 ```{r engine='bash', comment='', echo=F}
 cat pool/gamestate.py
 ```
 
-## physics.py
-
-```{r engine='bash', comment='', echo=F}
-cat pool/physics.py
-```
 
 ## collisions.py
 
@@ -1035,12 +1047,12 @@ Here are the objectives set for this project:
 * Physical interactions in the game should be realistic:
   * The movement of the balls should be affected by friction
   * The ball collisions should be inelastic
-  * The game should detect and resolve ball-ball and ball-table side collisions
-* Game animations look realistic:
+  * The game should detect and resolve ball-ball and ball-table side collisions correctly
+* Game animations should look realistic:
   * The balls should visibly rotate when moving
   * The cue should move towards the ball when a player is hitting a ball
-* A configuration file, which can change some of the in-game options like ball size or cue hit power
-* An installation guide/README file for users
+* There should be a configuration file, which can change some of the in-game options like ball size or cue hit power
+* An installation guide/README file for users should be present
 
 Collisions, ball movement and game rules were completed and tested in Testing section[@vid1][@vid2].
 
@@ -1061,11 +1073,11 @@ I have interviewed my classmate again after he installed and played the game on 
 
 __Was the game easy to install?__
 
-_Installing the game using the included shell script was as easy as it gets._
+_Installing the game using the included shell script was as easy as it gets. Just download the repository and run the starting script._
 
 __How was your gameplay experience?__
 
-_It wasn't the most graphically pleasing game I've seen in my life but not that it should have been. The game is has simple and appealing graphics. The collisions and the rules work well. I've had a lot of fun changing the values in the configuration file too see how the game would behave._
+_The game is simple and has appealing graphics. The collisions and the rules work well. I've had a lot of fun changing the values in the configuration file too see how the game would behave._
 
 __Did you encounter any bugs or errors?__
 
@@ -1079,14 +1091,16 @@ Besides the interview, the game became surprisingly popular online, gaining traf
 
 ## Possible Extensions
 
-As mentioned in analysis the multiplayer feature for this game is something I would like to implement, but it would to complex for me, because it requires a server to overlook the players actions and to synchronise both player's programs. One similar feature I would like to implement, but lack the resources to do so is an AI player. While it is significantly easier to implement AI than multiplayer, but after looking into this problem I have not found an easy way to do this. One algorithm for AI which caught my attention was this:
+Multiplayer for this game is something I would like to implement, but it would to complex for me alone, because it would require good network development knowledge, which I do not have. Additionally, it requires a server to overlook the players' actions and to synchronise both programs and I don't have a dedicated server, too.
+
+One similar feature I would like to implement, but lack the resources to do so, is an AI player. While it is significantly easier to implement AI than multiplayer, after looking into this problem I have not found an easy way to do this. One algorithm for AI which caught my attention was:
 
 1. Find every possible ball on the table you can hit.
-2. Check if any of the balls have a direct unblocked path to a pocket.
+2. Check which balls have a direct unblocked path to a pocket.
 3. Calculate where the point of contact must be made to hit the ball into that pocket.
 4. Calculate the angle of the cue required so that the cue ball would hit the target ball at the correct point of contact.
 
-This is a fairly simple algorithm but there are several problems with it. Firstly, it's not trivial to find the list of balls you can hit, without hitting another ball. One way to do that is - whenever you are checking a particular ball, see if any other balls are in the sector between the cue ball and the ball. That is at least $\mathcal{O}(n^2)$. Same for checking if the ball has an unblocked path to the pocket. Another way to implement this would be machine learning algorithms, but these are famous for requiring high level mathematics knowledge which I lack.
+This is a fairly simple algorithm but there are several problems with it. Firstly, it's not trivial to find the list of balls you can hit, without hitting another ball. One way to do that is - whenever you are checking a particular ball, see if any other balls between the cue ball and the target ball. In terms of speed, that is would be $\mathcal{O}(n^2)$, because the algorithm would have to iterate through every ball for every ball. Same for checking if the ball has an unblocked path to the pocket. Another way to implement this would be machine learning algorithms, but these are famous for requiring high level mathematics knowledge which I lack.
 
 Another design choice which could be improved is the stripe rendering algorithm. The problem with the algorithm is that it is an approximation and can be wrong when looked into very carefully.
 
